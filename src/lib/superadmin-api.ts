@@ -15,11 +15,18 @@ function getHeaders(token: string): HeadersInit {
 }
 
 async function handleResponse(res: Response) {
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error(body.detail || `Request failed: ${res.status}`);
-  }
-  return res.json();
+    if (!res.ok) {
+        const body = await res.json().catch(() => ({ detail: res.statusText }));
+
+        // Handle Pydantic 422 validation errors (detail is an array)
+        if (Array.isArray(body.detail)) {
+            const messages = body.detail.map((e: any) => e.msg || JSON.stringify(e)).join("; ");
+            throw new Error(messages);
+        }
+
+        throw new Error(body.detail || body.error || `Request failed: ${res.status}`);
+    }
+    return res.json();
 }
 
 // ── Auth ────────────────────────────────────────────────────────────────
