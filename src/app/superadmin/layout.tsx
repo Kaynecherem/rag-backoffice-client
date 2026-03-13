@@ -29,6 +29,7 @@ function SuperAdminShell({ children }: { children: React.ReactNode }) {
   const navItems = [
     { label: "Dashboard", href: "/superadmin", icon: "◆" },
     { label: "Tenants", href: "/superadmin/tenants", icon: "▣" },
+    { label: "Plans", href: "/superadmin/plans", icon: "▦" },
     { label: "Analytics", href: "/superadmin/analytics", icon: "◈" },
     { label: "Notifications", href: "/superadmin/notifications", icon: "▢" },
     { label: "RAG Pipeline", href: "/superadmin/rag-config", icon: "◇" },
