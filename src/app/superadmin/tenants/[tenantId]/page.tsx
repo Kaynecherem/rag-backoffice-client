@@ -355,11 +355,11 @@ function StaffTab({ tenantId }: { tenantId: string }) {
                             </div>
                         ) : (
                             <div className="flex gap-1 justify-end">
-                              <button onClick={() => handleResetPassword(s.id, s.email)} className="px-2 py-1 text-[11px] text-blue-400 border border-blue-400/30 rounded hover:bg-blue-400/10">Reset PW</button>
-                              <button onClick={() => { setEditingId(s.id); setEditData({ name: s.name || "", email: s.email, role: s.role }); setError(""); }} className="px-2 py-1 text-[11px] text-gray-400 border border-gray-700 rounded hover:bg-gray-800">Edit</button>
                               <button onClick={() => handleToggleStatus(s)} className={`px-2 py-1 text-[11px] rounded border ${s.is_active ? "text-red-400 border-red-400/30 hover:bg-red-400/10" : "text-emerald-400 border-emerald-400/30 hover:bg-emerald-400/10"}`}>
                                 {s.is_active ? "Deactivate" : "Activate"}
                               </button>
+                              <button onClick={() => handleResetPassword(s.id, s.email)} className="px-2 py-1 text-[11px] text-blue-400 border border-blue-400/30 rounded hover:bg-blue-400/10">Reset PW</button>
+                              <button onClick={() => { setEditingId(s.id); setEditData({ name: s.name || "", email: s.email, role: s.role }); setError(""); }} className="px-2 py-1 text-[11px] text-gray-400 border border-gray-700 rounded hover:bg-gray-800">Edit</button>
                               <button onClick={() => handleDeleteStaff(s.id, s.name)} className="px-2 py-1 text-[11px] text-red-400 border border-red-400/30 rounded hover:bg-red-400/10">Delete</button>
                             </div>
                         )}
