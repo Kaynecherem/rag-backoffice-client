@@ -205,15 +205,22 @@ function StaffTab({ tenantId }: { tenantId: string }) {
     return () => clearTimeout(t);
   }, [searchInput]);
 
+  const [passwordLink, setPasswordLink] = useState<string | null>(null);
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
     setSaving(true);
     setError("");
+    setPasswordLink(null);
     try {
-      await createStaff(user.token, tenantId, createData);
-      setShowCreate(false);
-      setCreateData({ name: "", email: "", role: "staff" });
+      const result = await createStaff(user.token, tenantId, createData);
+      if (result.password_reset_url) {
+        setPasswordLink(result.password_reset_url);
+      } else {
+        setShowCreate(false);
+        setCreateData({ name: "", email: "", role: "staff" });
+      }
       loadStaff();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed");
@@ -339,28 +346,52 @@ function StaffTab({ tenantId }: { tenantId: string }) {
       </div>
 
       {/* Create Modal */}
-      <Modal open={showCreate} onClose={() => setShowCreate(false)} title="Add Staff User">
-        <form onSubmit={handleCreate} className="space-y-4">
-          <div>
-            <label className="block text-xs font-medium text-gray-400 mb-1.5">Name</label>
-            <input type="text" value={createData.name} onChange={(e) => setCreateData({ ...createData, name: e.target.value })} required className="w-full px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-amber-400/50" placeholder="Jane Smith" />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-400 mb-1.5">Email</label>
-            <input type="email" value={createData.email} onChange={(e) => setCreateData({ ...createData, email: e.target.value })} required className="w-full px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-amber-400/50" placeholder="jane@agency.com" />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-400 mb-1.5">Role</label>
-            <select value={createData.role} onChange={(e) => setCreateData({ ...createData, role: e.target.value })} className="w-full px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-amber-400/50">
-              <option value="staff">Staff</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-          <div className="flex gap-3 pt-2">
-            <button type="button" onClick={() => setShowCreate(false)} className="flex-1 py-2.5 border border-gray-700 text-gray-400 text-sm rounded-lg hover:bg-gray-800">Cancel</button>
-            <button type="submit" disabled={saving} className="flex-1 py-2.5 bg-amber-400 text-gray-950 text-sm font-semibold rounded-lg hover:bg-amber-300 disabled:opacity-50">{saving ? "Creating..." : "Add Staff"}</button>
-          </div>
-        </form>
+      <Modal open={showCreate} onClose={() => { setShowCreate(false); setPasswordLink(null); }} title={passwordLink ? "Staff User Created" : "Add Staff User"}>
+        {passwordLink ? (
+            <div className="space-y-4">
+              <div className="text-sm text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded-lg px-3 py-2">
+                User created successfully. Share this link with them to set their password:
+              </div>
+              <div className="relative">
+                <pre className="bg-gray-800/50 rounded-lg p-3 text-[11px] text-gray-300 font-mono break-all overflow-x-auto max-h-24">{passwordLink}</pre>
+                <button
+                    onClick={() => { navigator.clipboard.writeText(passwordLink); }}
+                    className="absolute top-2 right-2 px-2 py-1 text-[11px] text-gray-400 border border-gray-700 rounded hover:bg-gray-800"
+                >
+                  Copy
+                </button>
+              </div>
+              <p className="text-[11px] text-gray-500">This link expires in 7 days. The user can set their password and then log in immediately.</p>
+              <button
+                  onClick={() => { setShowCreate(false); setPasswordLink(null); setCreateData({ name: "", email: "", role: "staff" }); }}
+                  className="w-full py-2.5 bg-amber-400 text-gray-950 text-sm font-semibold rounded-lg hover:bg-amber-300"
+              >
+                Done
+              </button>
+            </div>
+        ) : (
+            <form onSubmit={handleCreate} className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-400 mb-1.5">Name</label>
+                <input type="text" value={createData.name} onChange={(e) => setCreateData({ ...createData, name: e.target.value })} required className="w-full px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-amber-400/50" placeholder="Jane Smith" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-400 mb-1.5">Email</label>
+                <input type="email" value={createData.email} onChange={(e) => setCreateData({ ...createData, email: e.target.value })} required className="w-full px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-amber-400/50" placeholder="jane@agency.com" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-400 mb-1.5">Role</label>
+                <select value={createData.role} onChange={(e) => setCreateData({ ...createData, role: e.target.value })} className="w-full px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-amber-400/50">
+                  <option value="staff">Staff</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setShowCreate(false)} className="flex-1 py-2.5 border border-gray-700 text-gray-400 text-sm rounded-lg hover:bg-gray-800">Cancel</button>
+                <button type="submit" disabled={saving} className="flex-1 py-2.5 bg-amber-400 text-gray-950 text-sm font-semibold rounded-lg hover:bg-amber-300 disabled:opacity-50">{saving ? "Creating..." : "Add Staff"}</button>
+              </div>
+            </form>
+        )}
       </Modal>
     </div>
   );
