@@ -30,6 +30,7 @@ import {
   getTenantUsage,
   assignPlan,
   listPlans,
+  deleteStaff,
 } from "@/lib/superadmin-api";
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
@@ -186,6 +187,18 @@ function StaffTab({ tenantId }: { tenantId: string }) {
     finally { setLoading(false); }
   }, [user, tenantId, page, search]);
 
+  const handleDeleteStaff = async (staffId: string, name: string | null) => {
+    if (!confirm(`Permanently delete "${name}"? This will remove their Auth0 account. Their history entries will show as "(Deleted User)".`)) {
+      return;
+    }
+    try {
+      await deleteStaff(user!.token, tenantId, staffId);
+      loadStaff(); // refresh the list
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
   useEffect(() => { loadStaff(); }, [loadStaff]);
   useEffect(() => {
     const t = setTimeout(() => { setSearch(searchInput); setPage(1); }, 300);
@@ -305,6 +318,7 @@ function StaffTab({ tenantId }: { tenantId: string }) {
                         <button onClick={() => handleToggleStatus(s)} className={`px-2 py-1 text-[11px] rounded border ${s.is_active ? "text-red-400 border-red-400/30 hover:bg-red-400/10" : "text-emerald-400 border-emerald-400/30 hover:bg-emerald-400/10"}`}>
                           {s.is_active ? "Deactivate" : "Activate"}
                         </button>
+                        <button onClick={() => handleDeleteStaff(s.id, s.name)} className="px-2 py-1 text-[11px] text-red-400 border border-red-400/30 rounded hover:bg-red-400/10">Delete</button>
                       </div>
                     )}
                   </td>

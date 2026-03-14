@@ -576,3 +576,11 @@ export async function getFailedDocsSummary(token: string) {
     });
     return handleResponse(res);
 }
+
+export async function deleteStaff(token: string, tenantId: string, staffId: string) {
+    const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/staff/${staffId}`, {
+        method: "DELETE",
+        headers: getHeaders(token),
+    });
+    return handleResponse(res);
+}
