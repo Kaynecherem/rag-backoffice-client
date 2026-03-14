@@ -584,3 +584,11 @@ export async function deleteStaff(token: string, tenantId: string, staffId: stri
     });
     return handleResponse(res);
 }
+
+export async function resetStaffPassword(token: string, tenantId: string, staffId: string) {
+    const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/staff/${staffId}/reset-password`, {
+        method: "POST",
+        headers: getHeaders(token),
+    });
+    return handleResponse(res);
+}

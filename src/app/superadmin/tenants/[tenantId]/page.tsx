@@ -31,6 +31,7 @@ import {
   assignPlan,
   listPlans,
   deleteStaff,
+  resetStaffPassword,
 } from "@/lib/superadmin-api";
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -202,6 +203,21 @@ function StaffTab({ tenantId }: { tenantId: string }) {
     }
   };
 
+  const [resetLink, setResetLink] = useState<string | null>(null);
+  const [resetEmail, setResetEmail] = useState<string | null>(null);
+  const [showResetModal, setShowResetModal] = useState(false);
+
+  const handleResetPassword = async (staffId: string, email: string) => {
+    try {
+      const result = await resetStaffPassword(user!.token, tenantId, staffId);
+      setResetLink(result.password_reset_url);
+      setResetEmail(email);
+      setShowResetModal(true);
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
   useEffect(() => { loadStaff(); }, [loadStaff]);
   useEffect(() => {
     const t = setTimeout(() => { setSearch(searchInput); setPage(1); }, 300);
@@ -339,6 +355,7 @@ function StaffTab({ tenantId }: { tenantId: string }) {
                             </div>
                         ) : (
                             <div className="flex gap-1 justify-end">
+                              <button onClick={() => handleResetPassword(s.id, s.email)} className="px-2 py-1 text-[11px] text-blue-400 border border-blue-400/30 rounded hover:bg-blue-400/10">Reset PW</button>
                               <button onClick={() => { setEditingId(s.id); setEditData({ name: s.name || "", email: s.email, role: s.role }); setError(""); }} className="px-2 py-1 text-[11px] text-gray-400 border border-gray-700 rounded hover:bg-gray-800">Edit</button>
                               <button onClick={() => handleToggleStatus(s)} className={`px-2 py-1 text-[11px] rounded border ${s.is_active ? "text-red-400 border-red-400/30 hover:bg-red-400/10" : "text-emerald-400 border-emerald-400/30 hover:bg-emerald-400/10"}`}>
                                 {s.is_active ? "Deactivate" : "Activate"}
@@ -411,6 +428,24 @@ function StaffTab({ tenantId }: { tenantId: string }) {
                 </div>
               </form>
           )}
+        </Modal>
+        <Modal open={showResetModal} onClose={() => { setShowResetModal(false); setResetLink(null); setResetEmail(null); }} title="Password Reset Link">
+          <div className="space-y-4">
+            <div className="text-sm text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded-lg px-3 py-2">
+              Password reset link generated for <strong>{resetEmail}</strong>:
+            </div>
+            <div className="relative">
+              <pre className="bg-gray-800/50 rounded-lg p-3 text-[11px] text-gray-300 font-mono break-all overflow-x-auto max-h-24">{resetLink}</pre>
+              <button
+                  onClick={() => { if (resetLink) { navigator.clipboard.writeText(resetLink); } }}
+                  className="absolute top-2 right-2 px-2 py-1 text-[11px] text-amber-400 border border-amber-400/30 rounded hover:bg-amber-400/10"
+              >
+                Copy
+              </button>
+            </div>
+            <p className="text-[11px] text-gray-500">This link expires in 7 days.</p>
+            <button onClick={() => { setShowResetModal(false); setResetLink(null); setResetEmail(null); }} className="w-full py-2.5 bg-amber-400 text-gray-950 text-sm font-semibold rounded-lg hover:bg-amber-300">Done</button>
+          </div>
         </Modal>
       </div>
   );
