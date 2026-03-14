@@ -152,19 +152,31 @@ export async function listAuditLogs(
 export async function listStaff(
     token: string,
     tenantId: string,
-    params: { page?: number; page_size?: number; search?: string; role?: string; is_active?: boolean } = {}
+    params: {
+        page?: number;
+        page_size?: number;
+        search?: string;
+        role?: string;
+        is_active?: boolean;
+        show_deleted?: boolean;
+        sort_by?: string;
+        sort_order?: string;
+    } = {}
 ) {
-  const qs = new URLSearchParams();
-  if (params.page) qs.set("page", String(params.page));
-  if (params.page_size) qs.set("page_size", String(params.page_size));
-  if (params.search) qs.set("search", params.search);
-  if (params.role) qs.set("role", params.role);
-  if (params.is_active !== undefined) qs.set("is_active", String(params.is_active));
+    const qs = new URLSearchParams();
+    if (params.page) qs.set("page", String(params.page));
+    if (params.page_size) qs.set("page_size", String(params.page_size));
+    if (params.search) qs.set("search", params.search);
+    if (params.role) qs.set("role", params.role);
+    if (params.is_active !== undefined) qs.set("is_active", String(params.is_active));
+    if (params.show_deleted) qs.set("show_deleted", "true");
+    if (params.sort_by) qs.set("sort_by", params.sort_by);
+    if (params.sort_order) qs.set("sort_order", params.sort_order);
 
-  const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/staff?${qs}`, {
-    headers: getHeaders(token),
-  });
-  return handleResponse(res);
+    const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/staff?${qs}`, {
+        headers: getHeaders(token),
+    });
+    return handleResponse(res);
 }
 
 export async function createStaff(
