@@ -577,6 +577,47 @@ export async function getSystemHealth(token: string) {
     return handleResponse(res);
 }
 
+// ── Missing functions (were in original) ────────────────────────────────
+
+export async function toggleNotification(token: string, notifId: string, isActive: boolean) {
+    const res = await fetch(`${API_URL}/api/v1/superadmin/notifications/${notifId}/toggle`, {
+        method: "PATCH", headers: getHeaders(token), body: JSON.stringify({ is_active: isActive }),
+    });
+    return handleResponse(res);
+}
+
+export async function resetRAGConfig(token: string) {
+    const res = await fetch(`${API_URL}/api/v1/superadmin/rag-config/reset`, {
+        method: "POST", headers: getHeaders(token),
+    });
+    return handleResponse(res);
+}
+
+export async function queryLookup(token: string, params: any = {}) {
+    const qs = new URLSearchParams();
+    Object.entries(params).forEach(([k, v]) => { if (v !== undefined) qs.set(k, String(v)); });
+    const res = await fetch(`${API_URL}/api/v1/superadmin/support/query-lookup?${qs}`, { headers: getHeaders(token) });
+    return handleResponse(res);
+}
+
+export async function verificationDebug(token: string, tenantId: string, policyNumber: string) {
+    const res = await fetch(`${API_URL}/api/v1/superadmin/support/verification-debug/${tenantId}/${policyNumber}`, { headers: getHeaders(token) });
+    return handleResponse(res);
+}
+
+export async function getFailedDocsSummary(token: string) {
+    const res = await fetch(`${API_URL}/api/v1/superadmin/support/failed-docs`, { headers: getHeaders(token) });
+    return handleResponse(res);
+}
+
+export async function clearFailedDocs(token: string, tenantId?: string) {
+    const qs = tenantId ? `?tenant_id=${tenantId}` : "";
+    const res = await fetch(`${API_URL}/api/v1/superadmin/support/failed-docs/clear${qs}`, {
+        method: "POST", headers: getHeaders(token),
+    });
+    return handleResponse(res);
+}
+
 // ── Superadmin Account Management ───────────────────────────────────────
 
 export async function listSuperadmins(token: string, params: { search?: string; is_active?: boolean } = {}) {
