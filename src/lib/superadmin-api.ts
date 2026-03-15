@@ -579,7 +579,7 @@ export async function getSystemHealth(token: string) {
 
 // ── Missing functions (were in original) ────────────────────────────────
 
-export async function toggleNotification(token: string, notifId: string, isActive: boolean) {
+export async function toggleNotification(token: string, notifId: string, isActive?: boolean) {
     const res = await fetch(`${API_URL}/api/v1/superadmin/notifications/${notifId}/toggle`, {
         method: "PATCH", headers: getHeaders(token), body: JSON.stringify({ is_active: isActive }),
     });
