@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSuperAdminAuth } from "@/lib/superadmin-auth-context";
 import { superadminLogin, superadminSetup } from "@/lib/superadmin-api";
+import Image from "next/image";
 
 export default function SuperAdminLoginPage() {
   const { login } = useSuperAdminAuth();
@@ -42,13 +43,21 @@ export default function SuperAdminLoginPage() {
   return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
         <div className="w-full max-w-sm">
-          {/* Header */}
+          {/* Header — Patch Branding */}
           <div className="text-center mb-8">
-            <span className="text-amber-400 text-3xl">⬡</span>
-            <h1 className="mt-3 text-xl font-semibold text-white tracking-tight">
-              Insurance RAG
-            </h1>
-            <p className="text-xs uppercase tracking-widest text-amber-400/70 mt-1">
+            <div className="w-16 h-16 mx-auto mb-3 rounded-2xl overflow-hidden">
+              <Image
+                  src="/patch-logo-orange.jpg"
+                  alt="Patch"
+                  width={64}
+                  height={64}
+                  className="w-full h-full object-cover"
+              />
+            </div>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-amber-400/70 mt-2">
+              Powered by Patch
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
               Platform Administration
             </p>
           </div>

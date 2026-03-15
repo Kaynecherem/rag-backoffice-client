@@ -1,29 +1,28 @@
 /**
- * Superadmin API functions.
+ * Superadmin API functions — COMPLETE FILE.
  *
- * Uses the same API_URL as the rest of the app.
- * Import API_URL from your existing lib/api.ts, or set it here.
+ * Covers: auth, tenants, audit, staff mgmt, policyholder mgmt, document mgmt,
+ * widget config, impersonation, billing, notifications, onboarding, RAG config,
+ * compliance, support, analytics, system health, superadmin account management,
+ * and plan configuration editing.
  */
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001";
 
 function getHeaders(token: string): HeadersInit {
-  return {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
-  };
+    return {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+    };
 }
 
 async function handleResponse(res: Response) {
     if (!res.ok) {
         const body = await res.json().catch(() => ({ detail: res.statusText }));
-
-        // Handle Pydantic 422 validation errors (detail is an array)
         if (Array.isArray(body.detail)) {
             const messages = body.detail.map((e: any) => e.msg || JSON.stringify(e)).join("; ");
             throw new Error(messages);
         }
-
         throw new Error(body.detail || body.error || `Request failed: ${res.status}`);
     }
     return res.json();
@@ -32,119 +31,119 @@ async function handleResponse(res: Response) {
 // ── Auth ────────────────────────────────────────────────────────────────
 
 export async function superadminSetup(email: string, name: string, password: string) {
-  const res = await fetch(`${API_URL}/api/v1/superadmin/auth/setup`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, name, password }),
-  });
-  return handleResponse(res);
+    const res = await fetch(`${API_URL}/api/v1/superadmin/auth/setup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, name, password }),
+    });
+    return handleResponse(res);
 }
 
 export async function superadminLogin(email: string, password: string) {
-  const res = await fetch(`${API_URL}/api/v1/superadmin/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  });
-  return handleResponse(res);
+    const res = await fetch(`${API_URL}/api/v1/superadmin/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+    });
+    return handleResponse(res);
 }
 
 export async function getSuperadminProfile(token: string) {
-  const res = await fetch(`${API_URL}/api/v1/superadmin/auth/me`, {
-    headers: getHeaders(token),
-  });
-  return handleResponse(res);
+    const res = await fetch(`${API_URL}/api/v1/superadmin/auth/me`, {
+        headers: getHeaders(token),
+    });
+    return handleResponse(res);
 }
 
 // ── Platform Stats ──────────────────────────────────────────────────────
 
 export async function getPlatformStats(token: string) {
-  const res = await fetch(`${API_URL}/api/v1/superadmin/stats`, {
-    headers: getHeaders(token),
-  });
-  return handleResponse(res);
+    const res = await fetch(`${API_URL}/api/v1/superadmin/stats`, {
+        headers: getHeaders(token),
+    });
+    return handleResponse(res);
 }
 
 // ── Tenants ─────────────────────────────────────────────────────────────
 
 export async function listTenants(
-  token: string,
-  params: { page?: number; page_size?: number; status?: string; search?: string } = {}
+    token: string,
+    params: { page?: number; page_size?: number; status?: string; search?: string } = {}
 ) {
-  const qs = new URLSearchParams();
-  if (params.page) qs.set("page", String(params.page));
-  if (params.page_size) qs.set("page_size", String(params.page_size));
-  if (params.status) qs.set("status", params.status);
-  if (params.search) qs.set("search", params.search);
+    const qs = new URLSearchParams();
+    if (params.page) qs.set("page", String(params.page));
+    if (params.page_size) qs.set("page_size", String(params.page_size));
+    if (params.status) qs.set("status", params.status);
+    if (params.search) qs.set("search", params.search);
 
-  const res = await fetch(`${API_URL}/api/v1/superadmin/tenants?${qs}`, {
-    headers: getHeaders(token),
-  });
-  return handleResponse(res);
+    const res = await fetch(`${API_URL}/api/v1/superadmin/tenants?${qs}`, {
+        headers: getHeaders(token),
+    });
+    return handleResponse(res);
 }
 
 export async function getTenant(token: string, tenantId: string) {
-  const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}`, {
-    headers: getHeaders(token),
-  });
-  return handleResponse(res);
+    const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}`, {
+        headers: getHeaders(token),
+    });
+    return handleResponse(res);
 }
 
 export async function createTenant(
-  token: string,
-  data: { name: string; slug: string; status?: string }
+    token: string,
+    data: { name: string; slug: string; status?: string }
 ) {
-  const res = await fetch(`${API_URL}/api/v1/superadmin/tenants`, {
-    method: "POST",
-    headers: getHeaders(token),
-    body: JSON.stringify(data),
-  });
-  return handleResponse(res);
+    const res = await fetch(`${API_URL}/api/v1/superadmin/tenants`, {
+        method: "POST",
+        headers: getHeaders(token),
+        body: JSON.stringify(data),
+    });
+    return handleResponse(res);
 }
 
 export async function updateTenant(
-  token: string,
-  tenantId: string,
-  data: { name?: string; slug?: string; widget_config?: Record<string, unknown> }
+    token: string,
+    tenantId: string,
+    data: { name?: string; slug?: string; widget_config?: Record<string, unknown> }
 ) {
-  const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}`, {
-    method: "PUT",
-    headers: getHeaders(token),
-    body: JSON.stringify(data),
-  });
-  return handleResponse(res);
+    const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}`, {
+        method: "PUT",
+        headers: getHeaders(token),
+        body: JSON.stringify(data),
+    });
+    return handleResponse(res);
 }
 
 export async function updateTenantStatus(
-  token: string,
-  tenantId: string,
-  status: string,
-  reason?: string
+    token: string,
+    tenantId: string,
+    status: string,
+    reason?: string
 ) {
-  const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/status`, {
-    method: "PATCH",
-    headers: getHeaders(token),
-    body: JSON.stringify({ status, reason }),
-  });
-  return handleResponse(res);
+    const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/status`, {
+        method: "PATCH",
+        headers: getHeaders(token),
+        body: JSON.stringify({ status, reason }),
+    });
+    return handleResponse(res);
 }
 
 // ── Audit Logs ──────────────────────────────────────────────────────────
 
 export async function listAuditLogs(
-  token: string,
-  params: { page?: number; page_size?: number; action?: string; resource_type?: string } = {}
+    token: string,
+    params: { page?: number; page_size?: number; action?: string; resource_type?: string } = {}
 ) {
-  const qs = new URLSearchParams();
-  if (params.page) qs.set("page", String(params.page));
-  if (params.page_size) qs.set("page_size", String(params.page_size));
-  if (params.action) qs.set("action", params.action);
-  if (params.resource_type) qs.set("resource_type", params.resource_type);
+    const qs = new URLSearchParams();
+    if (params.page) qs.set("page", String(params.page));
+    if (params.page_size) qs.set("page_size", String(params.page_size));
+    if (params.action) qs.set("action", params.action);
+    if (params.resource_type) qs.set("resource_type", params.resource_type);
 
-  const res = await fetch(`${API_URL}/api/v1/superadmin/audit-logs?${qs}`, {
-    headers: getHeaders(token),
-  });
-  return handleResponse(res);
+    const res = await fetch(`${API_URL}/api/v1/superadmin/audit-logs?${qs}`, {
+        headers: getHeaders(token),
+    });
+    return handleResponse(res);
 }
 
 // ── Staff Management ────────────────────────────────────────────────────
@@ -184,12 +183,12 @@ export async function createStaff(
     tenantId: string,
     data: { email: string; name: string; role?: string }
 ) {
-  const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/staff`, {
-    method: "POST",
-    headers: getHeaders(token),
-    body: JSON.stringify(data),
-  });
-  return handleResponse(res);
+    const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/staff`, {
+        method: "POST",
+        headers: getHeaders(token),
+        body: JSON.stringify(data),
+    });
+    return handleResponse(res);
 }
 
 export async function updateStaff(
@@ -198,12 +197,12 @@ export async function updateStaff(
     staffId: string,
     data: { name?: string; role?: string; email?: string }
 ) {
-  const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/staff/${staffId}`, {
-    method: "PUT",
-    headers: getHeaders(token),
-    body: JSON.stringify(data),
-  });
-  return handleResponse(res);
+    const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/staff/${staffId}`, {
+        method: "PUT",
+        headers: getHeaders(token),
+        body: JSON.stringify(data),
+    });
+    return handleResponse(res);
 }
 
 export async function updateStaffStatus(
@@ -212,12 +211,28 @@ export async function updateStaffStatus(
     staffId: string,
     isActive: boolean
 ) {
-  const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/staff/${staffId}/status`, {
-    method: "PATCH",
-    headers: getHeaders(token),
-    body: JSON.stringify({ is_active: isActive }),
-  });
-  return handleResponse(res);
+    const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/staff/${staffId}/status`, {
+        method: "PATCH",
+        headers: getHeaders(token),
+        body: JSON.stringify({ is_active: isActive }),
+    });
+    return handleResponse(res);
+}
+
+export async function deleteStaff(token: string, tenantId: string, staffId: string) {
+    const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/staff/${staffId}`, {
+        method: "DELETE",
+        headers: getHeaders(token),
+    });
+    return handleResponse(res);
+}
+
+export async function resetStaffPassword(token: string, tenantId: string, staffId: string) {
+    const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/staff/${staffId}/reset-password`, {
+        method: "POST",
+        headers: getHeaders(token),
+    });
+    return handleResponse(res);
 }
 
 // ── Policyholder Management ─────────────────────────────────────────────
@@ -227,16 +242,16 @@ export async function listPolicyholders(
     tenantId: string,
     params: { page?: number; page_size?: number; search?: string; is_active?: boolean } = {}
 ) {
-  const qs = new URLSearchParams();
-  if (params.page) qs.set("page", String(params.page));
-  if (params.page_size) qs.set("page_size", String(params.page_size));
-  if (params.search) qs.set("search", params.search);
-  if (params.is_active !== undefined) qs.set("is_active", String(params.is_active));
+    const qs = new URLSearchParams();
+    if (params.page) qs.set("page", String(params.page));
+    if (params.page_size) qs.set("page_size", String(params.page_size));
+    if (params.search) qs.set("search", params.search);
+    if (params.is_active !== undefined) qs.set("is_active", String(params.is_active));
 
-  const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/policyholders?${qs}`, {
-    headers: getHeaders(token),
-  });
-  return handleResponse(res);
+    const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/policyholders?${qs}`, {
+        headers: getHeaders(token),
+    });
+    return handleResponse(res);
 }
 
 export async function createPolicyholder(
@@ -244,12 +259,12 @@ export async function createPolicyholder(
     tenantId: string,
     data: { policy_number: string; last_name?: string; company_name?: string }
 ) {
-  const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/policyholders`, {
-    method: "POST",
-    headers: getHeaders(token),
-    body: JSON.stringify(data),
-  });
-  return handleResponse(res);
+    const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/policyholders`, {
+        method: "POST",
+        headers: getHeaders(token),
+        body: JSON.stringify(data),
+    });
+    return handleResponse(res);
 }
 
 export async function updatePolicyholder(
@@ -258,12 +273,12 @@ export async function updatePolicyholder(
     phId: string,
     data: { policy_number?: string; last_name?: string; company_name?: string }
 ) {
-  const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/policyholders/${phId}`, {
-    method: "PUT",
-    headers: getHeaders(token),
-    body: JSON.stringify(data),
-  });
-  return handleResponse(res);
+    const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/policyholders/${phId}`, {
+        method: "PUT",
+        headers: getHeaders(token),
+        body: JSON.stringify(data),
+    });
+    return handleResponse(res);
 }
 
 export async function updatePolicyholderStatus(
@@ -272,12 +287,12 @@ export async function updatePolicyholderStatus(
     phId: string,
     isActive: boolean
 ) {
-  const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/policyholders/${phId}/status`, {
-    method: "PATCH",
-    headers: getHeaders(token),
-    body: JSON.stringify({ is_active: isActive }),
-  });
-  return handleResponse(res);
+    const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/policyholders/${phId}/status`, {
+        method: "PATCH",
+        headers: getHeaders(token),
+        body: JSON.stringify({ is_active: isActive }),
+    });
+    return handleResponse(res);
 }
 
 export async function bulkImportPolicyholders(
@@ -285,12 +300,12 @@ export async function bulkImportPolicyholders(
     tenantId: string,
     policyholders: Array<{ policy_number: string; last_name?: string; company_name?: string }>
 ) {
-  const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/policyholders/bulk-import`, {
-    method: "POST",
-    headers: getHeaders(token),
-    body: JSON.stringify({ policyholders }),
-  });
-  return handleResponse(res);
+    const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/policyholders/bulk-import`, {
+        method: "POST",
+        headers: getHeaders(token),
+        body: JSON.stringify({ policyholders }),
+    });
+    return handleResponse(res);
 }
 
 // ── Document Management ─────────────────────────────────────────────────
@@ -341,32 +356,7 @@ export async function deleteDocument(token: string, tenantId: string, docId: str
     return handleResponse(res);
 }
 
-// ── Analytics ───────────────────────────────────────────────────────────
-
-export async function getPlatformAnalytics(token: string, days: number = 30) {
-    const res = await fetch(`${API_URL}/api/v1/superadmin/analytics?days=${days}`, {
-        headers: getHeaders(token),
-    });
-    return handleResponse(res);
-}
-
-export async function getTenantAnalytics(token: string, tenantId: string, days: number = 30) {
-    const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/analytics?days=${days}`, {
-        headers: getHeaders(token),
-    });
-    return handleResponse(res);
-}
-
-// ── System Health ───────────────────────────────────────────────────────
-
-export async function getSystemHealth(token: string) {
-    const res = await fetch(`${API_URL}/api/v1/superadmin/system/health`, {
-        headers: getHeaders(token),
-    });
-    return handleResponse(res);
-}
-
-// ── Widget Configuration ────────────────────────────────────────────────
+// ── Widget Config ───────────────────────────────────────────────────────
 
 export async function getWidgetConfig(token: string, tenantId: string) {
     const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/widget-config`, {
@@ -471,22 +461,23 @@ export async function listNotifications(
     if (params.page_size) qs.set("page_size", String(params.page_size));
     if (params.notification_type) qs.set("notification_type", params.notification_type);
     if (params.is_active !== undefined) qs.set("is_active", String(params.is_active));
-    const res = await fetch(`${API_URL}/api/v1/superadmin/notifications?${qs}`, { headers: getHeaders(token) });
+
+    const res = await fetch(`${API_URL}/api/v1/superadmin/notifications?${qs}`, {
+        headers: getHeaders(token),
+    });
     return handleResponse(res);
 }
 
-export async function createNotification(token: string, data: {
-    title: string; message: string; notification_type: string; target?: string; target_tenant_id?: string;
-}) {
+export async function createNotification(token: string, data: any) {
     const res = await fetch(`${API_URL}/api/v1/superadmin/notifications`, {
         method: "POST", headers: getHeaders(token), body: JSON.stringify(data),
     });
     return handleResponse(res);
 }
 
-export async function toggleNotification(token: string, notifId: string) {
-    const res = await fetch(`${API_URL}/api/v1/superadmin/notifications/${notifId}/toggle`, {
-        method: "PATCH", headers: getHeaders(token),
+export async function updateNotification(token: string, notifId: string, data: any) {
+    const res = await fetch(`${API_URL}/api/v1/superadmin/notifications/${notifId}`, {
+        method: "PUT", headers: getHeaders(token), body: JSON.stringify(data),
     });
     return handleResponse(res);
 }
@@ -515,28 +506,21 @@ export async function updateOnboardingStep(token: string, tenantId: string, step
     return handleResponse(res);
 }
 
-// ── RAG Config ──────────────────────────────────────────────────────────
+// ── RAG Configuration ───────────────────────────────────────────────────
 
 export async function getRAGConfig(token: string) {
     const res = await fetch(`${API_URL}/api/v1/superadmin/rag-config`, { headers: getHeaders(token) });
     return handleResponse(res);
 }
 
-export async function updateRAGConfig(token: string, data: Record<string, any>) {
+export async function updateRAGConfig(token: string, data: any) {
     const res = await fetch(`${API_URL}/api/v1/superadmin/rag-config`, {
         method: "PUT", headers: getHeaders(token), body: JSON.stringify(data),
     });
     return handleResponse(res);
 }
 
-export async function resetRAGConfig(token: string) {
-    const res = await fetch(`${API_URL}/api/v1/superadmin/rag-config/reset`, {
-        method: "POST", headers: getHeaders(token),
-    });
-    return handleResponse(res);
-}
-
-// ── Compliance ──────────────────────────────────────────────────────────
+// ── Compliance / Disclaimer ─────────────────────────────────────────────
 
 export async function getDisclaimer(token: string, tenantId: string) {
     const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/disclaimer`, {
@@ -545,62 +529,141 @@ export async function getDisclaimer(token: string, tenantId: string) {
     return handleResponse(res);
 }
 
-export async function updateDisclaimer(token: string, tenantId: string, data: { disclaimer_text?: string; disclaimer_enabled?: boolean }) {
+export async function updateDisclaimer(token: string, tenantId: string, data: any) {
     const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/disclaimer`, {
         method: "PUT", headers: getHeaders(token), body: JSON.stringify(data),
     });
     return handleResponse(res);
 }
 
-// ── Support Tools ───────────────────────────────────────────────────────
+// ── Support ─────────────────────────────────────────────────────────────
 
-export async function queryLookup(token: string, params: {
-    search?: string; tenant_id?: string; user_identifier?: string; policy_number?: string;
-    page?: number; page_size?: number;
-} = {}) {
+export async function lookupQueries(token: string, params: any = {}) {
     const qs = new URLSearchParams();
     Object.entries(params).forEach(([k, v]) => { if (v !== undefined) qs.set(k, String(v)); });
-    const res = await fetch(`${API_URL}/api/v1/superadmin/support/query-lookup?${qs}`, {
+
+    const res = await fetch(`${API_URL}/api/v1/superadmin/support/queries?${qs}`, {
         headers: getHeaders(token),
     });
     return handleResponse(res);
 }
 
-export async function verificationDebug(token: string, tenantId: string, policyNumber: string) {
-    const qs = new URLSearchParams({ tenant_id: tenantId, policy_number: policyNumber });
-    const res = await fetch(`${API_URL}/api/v1/superadmin/support/verify-debug?${qs}`, {
+export async function debugVerification(token: string, tenantId: string, policyNumber: string) {
+    const res = await fetch(`${API_URL}/api/v1/superadmin/support/debug-verification/${tenantId}/${policyNumber}`, {
         headers: getHeaders(token),
     });
     return handleResponse(res);
 }
 
-export async function clearFailedDocs(token: string, tenantId?: string) {
-    const qs = tenantId ? `?tenant_id=${tenantId}` : "";
-    const res = await fetch(`${API_URL}/api/v1/superadmin/support/clear-failed-docs${qs}`, {
-        method: "POST", headers: getHeaders(token),
-    });
+// ── Analytics ───────────────────────────────────────────────────────────
+
+export async function getPlatformAnalytics(token: string) {
+    const res = await fetch(`${API_URL}/api/v1/superadmin/analytics`, { headers: getHeaders(token) });
     return handleResponse(res);
 }
 
-export async function getFailedDocsSummary(token: string) {
-    const res = await fetch(`${API_URL}/api/v1/superadmin/support/failed-docs-summary`, {
+export async function getTenantAnalytics(token: string, tenantId: string) {
+    const res = await fetch(`${API_URL}/api/v1/superadmin/analytics/tenants/${tenantId}`, {
         headers: getHeaders(token),
     });
     return handleResponse(res);
 }
 
-export async function deleteStaff(token: string, tenantId: string, staffId: string) {
-    const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/staff/${staffId}`, {
-        method: "DELETE",
+// ── System Health ───────────────────────────────────────────────────────
+
+export async function getSystemHealth(token: string) {
+    const res = await fetch(`${API_URL}/api/v1/superadmin/health`, { headers: getHeaders(token) });
+    return handleResponse(res);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// NEW: Superadmin Account Management
+// ═══════════════════════════════════════════════════════════════════════════
+
+export async function listSuperadmins(
+    token: string,
+    params: { search?: string; is_active?: boolean } = {}
+) {
+    const qs = new URLSearchParams();
+    if (params.search) qs.set("search", params.search);
+    if (params.is_active !== undefined) qs.set("is_active", String(params.is_active));
+
+    const res = await fetch(`${API_URL}/api/v1/superadmin/admins?${qs}`, {
         headers: getHeaders(token),
     });
     return handleResponse(res);
 }
 
-export async function resetStaffPassword(token: string, tenantId: string, staffId: string) {
-    const res = await fetch(`${API_URL}/api/v1/superadmin/tenants/${tenantId}/staff/${staffId}/reset-password`, {
+export async function createSuperadmin(
+    token: string,
+    data: { email: string; name: string; password: string }
+) {
+    const res = await fetch(`${API_URL}/api/v1/superadmin/admins`, {
         method: "POST",
         headers: getHeaders(token),
+        body: JSON.stringify(data),
+    });
+    return handleResponse(res);
+}
+
+export async function updateSuperadmin(
+    token: string,
+    adminId: string,
+    data: { name?: string; email?: string }
+) {
+    const res = await fetch(`${API_URL}/api/v1/superadmin/admins/${adminId}`, {
+        method: "PUT",
+        headers: getHeaders(token),
+        body: JSON.stringify(data),
+    });
+    return handleResponse(res);
+}
+
+export async function changeSuperadminPassword(
+    token: string,
+    adminId: string,
+    data: { current_password: string; new_password: string }
+) {
+    const res = await fetch(`${API_URL}/api/v1/superadmin/admins/${adminId}/change-password`, {
+        method: "POST",
+        headers: getHeaders(token),
+        body: JSON.stringify(data),
+    });
+    return handleResponse(res);
+}
+
+export async function toggleSuperadminStatus(
+    token: string,
+    adminId: string,
+    isActive: boolean
+) {
+    const res = await fetch(`${API_URL}/api/v1/superadmin/admins/${adminId}/status`, {
+        method: "PATCH",
+        headers: getHeaders(token),
+        body: JSON.stringify({ is_active: isActive }),
+    });
+    return handleResponse(res);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// NEW: Plan Configuration Editing
+// ═══════════════════════════════════════════════════════════════════════════
+
+export async function updatePlanConfig(
+    token: string,
+    planKey: string,
+    data: {
+        query_limit_monthly?: number;
+        document_limit?: number;
+        staff_limit?: number;
+        policyholder_limit?: number;
+        features?: string[];
+    }
+) {
+    const res = await fetch(`${API_URL}/api/v1/superadmin/plans/${planKey}`, {
+        method: "PATCH",
+        headers: getHeaders(token),
+        body: JSON.stringify(data),
     });
     return handleResponse(res);
 }

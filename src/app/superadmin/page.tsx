@@ -160,7 +160,7 @@ export default function SuperAdminDashboard() {
                     </div>
                   </div>
                   <span className="text-xs text-gray-600 whitespace-nowrap flex-shrink-0">
-                    {timeAgo(entry.performed_at)}
+                    {timeAgo(entry.performed_at || entry.created_at)}
                   </span>
                 </div>
               ))}

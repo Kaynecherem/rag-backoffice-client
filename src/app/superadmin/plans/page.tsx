@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSuperAdminAuth } from "@/lib/superadmin-auth-context";
-import { listPlans } from "@/lib/superadmin-api";
+import { listPlans, updatePlanConfig } from "@/lib/superadmin-api";
 
 // ── Feature display names ───────────────────────────────────────────────
 
@@ -13,7 +13,7 @@ const FEATURE_LABELS: Record<string, { name: string; description: string }> = {
     },
     batch_upload: {
         name: "Batch Upload",
-        description: "Upload multiple policy documents or communications in a single request",
+        description: "Upload multiple communication documents in a single request (policy batch upload is always available)",
     },
     api_access: {
         name: "API Access",
@@ -26,8 +26,6 @@ const FEATURE_LABELS: Record<string, { name: string; description: string }> = {
 };
 
 const ALL_FEATURES = ["widget", "batch_upload", "api_access", "custom_model"];
-
-// ── Plan order and accent colors ────────────────────────────────────────
 
 const PLAN_ORDER = ["trial", "starter", "professional", "enterprise"];
 
@@ -58,20 +56,20 @@ const PLAN_ACCENTS: Record<string, { border: string; bg: string; badge: string; 
     },
 };
 
-// ── Helper ──────────────────────────────────────────────────────────────
-
 function formatLimit(value: number): string {
     if (value === 0) return "Unlimited";
     return value.toLocaleString();
 }
-
-// ── Page Component ──────────────────────────────────────────────────────
 
 export default function PlansPage() {
     const { user } = useSuperAdminAuth();
     const [plans, setPlans] = useState<Record<string, any>>({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [editingPlan, setEditingPlan] = useState<string | null>(null);
+    const [editForm, setEditForm] = useState<any>({});
+    const [saving, setSaving] = useState(false);
+    const [success, setSuccess] = useState("");
 
     useEffect(() => {
         if (!user) return;
@@ -82,20 +80,55 @@ export default function PlansPage() {
             .finally(() => setLoading(false));
     }, [user]);
 
+    const startEdit = (key: string, plan: any) => {
+        setEditingPlan(key);
+        setEditForm({
+            query_limit_monthly: plan.query_limit_monthly,
+            document_limit: plan.document_limit,
+            staff_limit: plan.staff_limit,
+            policyholder_limit: plan.policyholder_limit,
+            features: [...(plan.features || [])],
+        });
+    };
+
+    const cancelEdit = () => {
+        setEditingPlan(null);
+        setEditForm({});
+    };
+
+    const handleSave = async () => {
+        if (!user || !editingPlan) return;
+        setSaving(true);
+        setError("");
+        try {
+            const result = await updatePlanConfig(user.token, editingPlan, editForm);
+            // Merge updated plan back
+            const updatedPlanData = result[editingPlan];
+            setPlans((prev) => ({ ...prev, [editingPlan]: updatedPlanData }));
+            setEditingPlan(null);
+            setSuccess(`Plan "${editingPlan}" updated successfully`);
+            setTimeout(() => setSuccess(""), 3000);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Failed to update plan");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const toggleFeature = (feat: string) => {
+        setEditForm((prev: any) => {
+            const features = [...(prev.features || [])];
+            const idx = features.indexOf(feat);
+            if (idx >= 0) features.splice(idx, 1);
+            else features.push(feat);
+            return { ...prev, features };
+        });
+    };
+
     if (loading) {
         return (
             <div className="flex justify-center py-20">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-amber-400" />
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="max-w-6xl mx-auto px-6 py-8">
-                <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-red-400 text-sm">
-                    {error}
-                </div>
             </div>
         );
     }
@@ -107,11 +140,28 @@ export default function PlansPage() {
 
     return (
         <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
-            {/* Header */}
             <div>
                 <h1 className="text-xl font-bold text-white">Plans & Pricing</h1>
                 <p className="text-sm text-gray-500 mt-1">
-                    Overview of all available plans and their limits. Assign plans to tenants from their Billing tab.
+                    Configure plan limits and features. Policy documents are unlimited on all plans. Click &ldquo;Edit&rdquo; to modify a plan.
+                </p>
+            </div>
+
+            {success && (
+                <div className="text-emerald-400 text-xs bg-emerald-400/10 border border-emerald-400/20 rounded-lg px-3 py-2">
+                    {success}
+                </div>
+            )}
+            {error && (
+                <div className="text-red-400 text-xs bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
+                    {error}
+                </div>
+            )}
+
+            {/* Info Banner */}
+            <div className="bg-blue-500/5 border border-blue-500/20 rounded-lg p-4">
+                <p className="text-xs text-blue-400/80 leading-relaxed">
+                    <strong>Policy documents and policyholders are unlimited</strong> on all plans. The &ldquo;Documents&rdquo; limit below only applies to communication documents (letters, notes, E&O records). Batch upload for policy documents is always available regardless of plan.
                 </p>
             </div>
 
@@ -119,47 +169,74 @@ export default function PlansPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
                 {orderedPlans.map((plan) => {
                     const accent = PLAN_ACCENTS[plan.key] || PLAN_ACCENTS.trial;
+                    const isEditing = editingPlan === plan.key;
+
                     return (
                         <div
                             key={plan.key}
                             className={`rounded-xl border ${accent.border} ${accent.bg} p-5 flex flex-col`}
                         >
-                            {/* Plan name */}
                             <div className="flex items-center justify-between mb-4">
-                <span
-                    className={`text-xs font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full ${accent.badge}`}
-                >
-                  {plan.name}
-                </span>
-                                {plan.key === "professional" && (
-                                    <span className="text-[10px] text-amber-400 bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded-full">
-                    Popular
-                  </span>
+                                <span className={`text-xs font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full ${accent.badge}`}>
+                                    {plan.name}
+                                </span>
+                                {!isEditing ? (
+                                    <button
+                                        onClick={() => startEdit(plan.key, plan)}
+                                        className="text-[10px] text-gray-500 hover:text-amber-400 transition"
+                                    >
+                                        Edit
+                                    </button>
+                                ) : (
+                                    <div className="flex gap-1">
+                                        <button
+                                            onClick={handleSave}
+                                            disabled={saving}
+                                            className="text-[10px] text-amber-400 hover:text-amber-300 font-medium"
+                                        >
+                                            {saving ? "..." : "Save"}
+                                        </button>
+                                        <button
+                                            onClick={cancelEdit}
+                                            className="text-[10px] text-gray-500 hover:text-gray-300"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
                                 )}
                             </div>
 
                             {/* Limits */}
                             <div className="space-y-3 flex-1">
-                                <LimitRow
+                                <EditableLimitRow
                                     label="Queries / month"
-                                    value={plan.query_limit_monthly}
+                                    value={isEditing ? editForm.query_limit_monthly : plan.query_limit_monthly}
                                     accent={accent.text}
+                                    editing={isEditing}
+                                    onChange={(v) => setEditForm((p: any) => ({ ...p, query_limit_monthly: v }))}
                                 />
-                                <LimitRow
-                                    label="Documents"
-                                    value={plan.document_limit}
+                                <EditableLimitRow
+                                    label="Comm. Documents"
+                                    value={isEditing ? editForm.document_limit : plan.document_limit}
                                     accent={accent.text}
+                                    editing={isEditing}
+                                    onChange={(v) => setEditForm((p: any) => ({ ...p, document_limit: v }))}
                                 />
-                                <LimitRow
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs text-gray-500">Policy Documents</span>
+                                    <span className="text-sm font-semibold text-emerald-400">Unlimited</span>
+                                </div>
+                                <EditableLimitRow
                                     label="Staff users"
-                                    value={plan.staff_limit}
+                                    value={isEditing ? editForm.staff_limit : plan.staff_limit}
                                     accent={accent.text}
+                                    editing={isEditing}
+                                    onChange={(v) => setEditForm((p: any) => ({ ...p, staff_limit: v }))}
                                 />
-                                <LimitRow
-                                    label="Policyholders"
-                                    value={plan.policyholder_limit}
-                                    accent={accent.text}
-                                />
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs text-gray-500">Policyholders</span>
+                                    <span className="text-sm font-semibold text-emerald-400">Unlimited</span>
+                                </div>
                             </div>
 
                             {/* Features */}
@@ -169,45 +246,26 @@ export default function PlansPage() {
                                 </div>
                                 <div className="space-y-1.5">
                                     {ALL_FEATURES.map((feat) => {
-                                        const included = plan.features?.includes(feat);
+                                        const currentFeatures = isEditing ? editForm.features : (plan.features || []);
+                                        const included = currentFeatures.includes(feat);
                                         return (
                                             <div key={feat} className="flex items-center gap-2">
-                                                {included ? (
-                                                    <svg
-                                                        className={`w-3.5 h-3.5 ${accent.text}`}
-                                                        fill="none"
-                                                        viewBox="0 0 24 24"
-                                                        stroke="currentColor"
-                                                        strokeWidth={2.5}
+                                                {isEditing ? (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => toggleFeature(feat)}
+                                                        className={`text-sm ${included ? accent.text : "text-gray-700"}`}
                                                     >
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            d="M5 13l4 4L19 7"
-                                                        />
-                                                    </svg>
+                                                        {included ? "✓" : "○"}
+                                                    </button>
+                                                ) : included ? (
+                                                    <span className={`text-sm ${accent.text}`}>✓</span>
                                                 ) : (
-                                                    <svg
-                                                        className="w-3.5 h-3.5 text-gray-700"
-                                                        fill="none"
-                                                        viewBox="0 0 24 24"
-                                                        stroke="currentColor"
-                                                        strokeWidth={2}
-                                                    >
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            d="M6 18L18 6M6 6l12 12"
-                                                        />
-                                                    </svg>
+                                                    <span className="text-gray-700 text-sm">—</span>
                                                 )}
-                                                <span
-                                                    className={`text-xs ${
-                                                        included ? "text-gray-300" : "text-gray-700"
-                                                    }`}
-                                                >
-                          {FEATURE_LABELS[feat]?.name || feat}
-                        </span>
+                                                <span className={`text-xs ${included ? "text-gray-300" : "text-gray-600"}`}>
+                                                    {FEATURE_LABELS[feat]?.name || feat}
+                                                </span>
                                             </div>
                                         );
                                     })}
@@ -218,72 +276,6 @@ export default function PlansPage() {
                 })}
             </div>
 
-            {/* Detailed Comparison Table */}
-            <div>
-                <h2 className="text-sm font-semibold text-white mb-3">Detailed Comparison</h2>
-                <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-                    <table className="w-full text-sm">
-                        <thead>
-                        <tr className="border-b border-gray-800">
-                            <th className="text-left text-xs text-gray-500 font-medium px-5 py-3 w-1/3">
-                                Limit
-                            </th>
-                            {orderedPlans.map((plan) => (
-                                <th
-                                    key={plan.key}
-                                    className={`text-center text-xs font-medium px-4 py-3 ${
-                                        PLAN_ACCENTS[plan.key]?.text || "text-gray-400"
-                                    }`}
-                                >
-                                    {plan.name}
-                                </th>
-                            ))}
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <ComparisonRow
-                            label="Monthly queries"
-                            values={orderedPlans.map((p) => p.query_limit_monthly)}
-                        />
-                        <ComparisonRow
-                            label="Total documents"
-                            values={orderedPlans.map((p) => p.document_limit)}
-                        />
-                        <ComparisonRow
-                            label="Staff users"
-                            values={orderedPlans.map((p) => p.staff_limit)}
-                        />
-                        <ComparisonRow
-                            label="Policyholders"
-                            values={orderedPlans.map((p) => p.policyholder_limit)}
-                        />
-                        {ALL_FEATURES.map((feat) => (
-                            <tr key={feat} className="border-t border-gray-800/50">
-                                <td className="px-5 py-2.5 text-gray-400 text-xs">
-                                    {FEATURE_LABELS[feat]?.name || feat}
-                                </td>
-                                {orderedPlans.map((plan) => (
-                                    <td key={plan.key} className="text-center px-4 py-2.5">
-                                        {plan.features?.includes(feat) ? (
-                                            <span
-                                                className={`text-sm ${
-                                                    PLAN_ACCENTS[plan.key]?.text || "text-gray-400"
-                                                }`}
-                                            >
-                          ✓
-                        </span>
-                                        ) : (
-                                            <span className="text-gray-700 text-sm">—</span>
-                                        )}
-                                    </td>
-                                ))}
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
             {/* Feature Descriptions */}
             <div>
                 <h2 className="text-sm font-semibold text-white mb-3">Feature Details</h2>
@@ -292,10 +284,7 @@ export default function PlansPage() {
                         const info = FEATURE_LABELS[feat];
                         if (!info) return null;
                         return (
-                            <div
-                                key={feat}
-                                className="bg-gray-900 border border-gray-800 rounded-lg px-4 py-3"
-                            >
+                            <div key={feat} className="bg-gray-900 border border-gray-800 rounded-lg px-4 py-3">
                                 <div className="text-xs font-medium text-white">{info.name}</div>
                                 <div className="text-xs text-gray-500 mt-1">{info.description}</div>
                             </div>
@@ -307,36 +296,39 @@ export default function PlansPage() {
     );
 }
 
-// ── Sub-components ──────────────────────────────────────────────────────
-
-function LimitRow({
-                      label,
-                      value,
-                      accent,
-                  }: {
+function EditableLimitRow({
+                              label,
+                              value,
+                              accent,
+                              editing,
+                              onChange,
+                          }: {
     label: string;
     value: number;
     accent: string;
+    editing: boolean;
+    onChange: (val: number) => void;
 }) {
+    if (editing) {
+        return (
+            <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-500">{label}</span>
+                <input
+                    type="number"
+                    min={0}
+                    value={value}
+                    onChange={(e) => onChange(parseInt(e.target.value) || 0)}
+                    className="w-24 text-right px-2 py-1 bg-gray-800 border border-gray-700 rounded text-xs text-white focus:outline-none focus:border-amber-400/50"
+                />
+            </div>
+        );
+    }
     return (
         <div className="flex items-center justify-between">
             <span className="text-xs text-gray-500">{label}</span>
             <span className={`text-sm font-semibold ${value === 0 ? accent : "text-white"}`}>
-        {formatLimit(value)}
-      </span>
+                {formatLimit(value)}
+            </span>
         </div>
-    );
-}
-
-function ComparisonRow({ label, values }: { label: string; values: number[] }) {
-    return (
-        <tr className="border-t border-gray-800/50">
-            <td className="px-5 py-2.5 text-gray-400 text-xs">{label}</td>
-            {values.map((val, i) => (
-                <td key={i} className="text-center px-4 py-2.5 text-xs text-white">
-                    {formatLimit(val)}
-                </td>
-            ))}
-        </tr>
     );
 }
