@@ -667,3 +667,78 @@ export async function updatePlanConfig(
     });
     return handleResponse(res);
 }
+
+// ── Superadmin Account Management ───────────────────────────────────────
+
+export async function listSuperadmins(
+    token: string,
+    params: { search?: string; is_active?: boolean } = {}
+) {
+    const qs = new URLSearchParams();
+    if (params.search) qs.set("search", params.search);
+    if (params.is_active !== undefined) qs.set("is_active", String(params.is_active));
+    const res = await fetch(`${API_URL}/api/v1/superadmin/admins?${qs}`, { headers: getHeaders(token) });
+    return handleResponse(res);
+}
+
+export async function createSuperadmin(
+    token: string,
+    data: { email: string; name: string; password: string }
+) {
+    const res = await fetch(`${API_URL}/api/v1/superadmin/admins`, {
+        method: "POST", headers: getHeaders(token), body: JSON.stringify(data),
+    });
+    return handleResponse(res);
+}
+
+export async function updateSuperadmin(
+    token: string,
+    adminId: string,
+    data: { name?: string; email?: string }
+) {
+    const res = await fetch(`${API_URL}/api/v1/superadmin/admins/${adminId}`, {
+        method: "PUT", headers: getHeaders(token), body: JSON.stringify(data),
+    });
+    return handleResponse(res);
+}
+
+export async function changeSuperadminPassword(
+    token: string,
+    adminId: string,
+    data: { current_password: string; new_password: string }
+) {
+    const res = await fetch(`${API_URL}/api/v1/superadmin/admins/${adminId}/change-password`, {
+        method: "POST", headers: getHeaders(token), body: JSON.stringify(data),
+    });
+    return handleResponse(res);
+}
+
+export async function toggleSuperadminStatus(
+    token: string,
+    adminId: string,
+    isActive: boolean
+) {
+    const res = await fetch(`${API_URL}/api/v1/superadmin/admins/${adminId}/status`, {
+        method: "PATCH", headers: getHeaders(token), body: JSON.stringify({ is_active: isActive }),
+    });
+    return handleResponse(res);
+}
+
+// ── Plan Configuration ──────────────────────────────────────────────────
+
+export async function updatePlanConfig(
+    token: string,
+    planKey: string,
+    data: {
+        query_limit_monthly?: number;
+        document_limit?: number;
+        staff_limit?: number;
+        policyholder_limit?: number;
+        features?: string[];
+    }
+) {
+    const res = await fetch(`${API_URL}/api/v1/superadmin/plans/${planKey}`, {
+        method: "PATCH", headers: getHeaders(token), body: JSON.stringify(data),
+    });
+    return handleResponse(res);
+}
