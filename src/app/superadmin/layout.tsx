@@ -3,12 +3,13 @@
 import React, { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { SuperAdminAuthProvider, useSuperAdminAuth } from "@/lib/superadmin-auth-context";
-import Image from "next/image";
+import { useTheme } from "@/components/ThemeProvider";
 
 function SuperAdminShell({ children }: { children: React.ReactNode }) {
   const { user, hydrated, logout } = useSuperAdminAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     if (hydrated && !user && pathname !== "/superadmin/login") {
@@ -18,8 +19,8 @@ function SuperAdminShell({ children }: { children: React.ReactNode }) {
 
   if (!hydrated) {
     return (
-        <div className="h-screen flex items-center justify-center bg-gray-950">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-400" />
+        <div className="h-screen flex items-center justify-center bg-page">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent" />
         </div>
     );
   }
@@ -46,26 +47,19 @@ function SuperAdminShell({ children }: { children: React.ReactNode }) {
   };
 
   return (
-      <div className="h-screen flex overflow-hidden bg-gray-950 text-gray-100">
-        <aside className="w-60 flex-shrink-0 bg-gray-900 border-r border-gray-800 flex flex-col">
-          <div className="p-5 border-b border-gray-800">
+      <div className="h-screen flex overflow-hidden bg-page text-body">
+        <aside className="w-60 flex-shrink-0 bg-card border-r border-border-default flex flex-col">
+          <div className="p-5 border-b border-border-default">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0">
-                <Image
-                    src="/patch-logo-orange.jpg"
-                    alt="Patch"
-                    width={36}
-                    height={36}
-                    className="w-full h-full object-cover"
-                />
-              </div>
-              <div>
-                <div className="text-[10px] uppercase tracking-[0.15em] text-amber-400/80">
-                  Powered by Patch
-                </div>
-                <div className="text-[10px] text-gray-500 mt-0.5">Superadmin</div>
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                  src={theme === "dark" ? "/patch-premium-finance-logo-dark.svg" : "/patch-premium-finance-logo.svg"}
+                  alt="Patch Premium Finance"
+                  style={{ height: '40px', width: 'auto' }}
+                  className="flex-shrink-0"
+              />
             </div>
+            <div className="text-[10px] text-muted mt-2">Superadmin</div>
           </div>
 
           <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
@@ -75,8 +69,8 @@ function SuperAdminShell({ children }: { children: React.ReactNode }) {
                     onClick={() => router.push(item.href)}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
                         isActive(item.href)
-                            ? "bg-amber-400/10 text-amber-400 font-medium"
-                            : "text-gray-400 hover:text-gray-200 hover:bg-gray-800/60"
+                            ? "bg-accent/10 text-accent font-medium"
+                            : "text-secondary hover:text-heading hover:bg-surface/60"
                     }`}
                 >
                   <span className="text-base">{item.icon}</span>
@@ -85,11 +79,23 @@ function SuperAdminShell({ children }: { children: React.ReactNode }) {
             ))}
           </nav>
 
-          <div className="p-4 border-t border-gray-800">
-            <div className="text-xs text-gray-500 truncate mb-2">{user.email}</div>
+          <div className="p-4 border-t border-border-default space-y-3">
+            {/* Theme toggle */}
+            <button
+                onClick={toggleTheme}
+                className="w-full flex items-center gap-2 text-xs text-secondary hover:text-heading transition-colors"
+            >
+              {theme === "dark" ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+              ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              )}
+              {theme === "dark" ? "Light mode" : "Dark mode"}
+            </button>
+            <div className="text-xs text-muted truncate">{user.email}</div>
             <button
                 onClick={() => { logout(); router.replace("/superadmin/login"); }}
-                className="w-full text-left text-xs text-gray-500 hover:text-red-400 transition-colors"
+                className="w-full text-left text-xs text-secondary hover:text-red-500 transition-colors"
             >
               Sign out
             </button>

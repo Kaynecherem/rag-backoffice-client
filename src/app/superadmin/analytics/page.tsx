@@ -32,11 +32,11 @@ function BarChart({ data, maxBars = 30 }: { data: Array<{ label: string; value: 
         return (
           <div key={i} className="flex-1 flex flex-col items-center justify-end group relative">
             <div
-              className="w-full bg-amber-400/70 rounded-t-sm transition-all hover:bg-amber-400 min-h-[2px]"
+              className="w-full bg-accent/70 rounded-t-sm transition-all hover:bg-accent min-h-[2px]"
               style={{ height: `${Math.max(height, 2)}%` }}
             />
             {/* Tooltip */}
-            <div className="absolute bottom-full mb-2 hidden group-hover:block bg-gray-800 border border-gray-700 rounded px-2 py-1 text-[10px] text-white whitespace-nowrap z-10 shadow-lg">
+            <div className="absolute bottom-full mb-2 hidden group-hover:block bg-surface border border-input-border rounded px-2 py-1 text-[10px] text-heading whitespace-nowrap z-10 shadow-lg">
               {d.label}: {d.value}
             </div>
           </div>
@@ -48,7 +48,7 @@ function BarChart({ data, maxBars = 30 }: { data: Array<{ label: string; value: 
 
 // ── Horizontal Bar Chart ────────────────────────────────────────────────
 
-function HorizontalBar({ items, colorClass = "bg-amber-400" }: { items: Array<{ label: string; value: number }>; colorClass?: string }) {
+function HorizontalBar({ items, colorClass = "bg-accent" }: { items: Array<{ label: string; value: number }>; colorClass?: string }) {
   const maxVal = Math.max(...items.map((i) => i.value), 1);
 
   return (
@@ -56,10 +56,10 @@ function HorizontalBar({ items, colorClass = "bg-amber-400" }: { items: Array<{ 
       {items.map((item, i) => (
         <div key={i}>
           <div className="flex items-center justify-between text-xs mb-1">
-            <span className="text-gray-300 truncate mr-2">{item.label}</span>
-            <span className="text-gray-500 flex-shrink-0">{item.value.toLocaleString()}</span>
+            <span className="text-body truncate mr-2">{item.label}</span>
+            <span className="text-muted flex-shrink-0">{item.value.toLocaleString()}</span>
           </div>
-          <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+          <div className="h-2 bg-surface rounded-full overflow-hidden">
             <div
               className={`h-full ${colorClass} rounded-full transition-all`}
               style={{ width: `${(item.value / maxVal) * 100}%` }}
@@ -93,13 +93,13 @@ export default function AnalyticsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-400" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent" />
       </div>
     );
   }
 
   if (!data) {
-    return <div className="p-6 text-gray-500">Failed to load analytics.</div>;
+    return <div className="p-6 text-muted">Failed to load analytics.</div>;
   }
 
   const chartData = data.queries_by_day.map((d) => ({
@@ -112,16 +112,16 @@ export default function AnalyticsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Analytics</h1>
-          <p className="text-sm text-gray-500 mt-1">Platform-wide query and usage data</p>
+          <h1 className="text-2xl font-semibold text-heading">Analytics</h1>
+          <p className="text-sm text-muted mt-1">Platform-wide query and usage data</p>
         </div>
-        <div className="flex gap-1 bg-gray-900 rounded-lg p-1 self-start">
+        <div className="flex gap-1 bg-card rounded-lg p-1 self-start">
           {[7, 30, 90].map((d) => (
             <button
               key={d}
               onClick={() => setDays(d)}
               className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-                days === d ? "bg-gray-800 text-white" : "text-gray-500 hover:text-gray-300"
+                days === d ? "bg-surface text-heading" : "text-muted hover:text-body"
               }`}
             >
               {d}d
@@ -140,9 +140,9 @@ export default function AnalyticsPage() {
           { label: "Avg Confidence", value: data.avg_confidence ? `${(data.avg_confidence * 100).toFixed(1)}%` : "—" },
           { label: "Avg Latency", value: data.avg_latency_ms ? `${data.avg_latency_ms.toFixed(0)}ms` : "—" },
         ].map((card) => (
-          <div key={card.label} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            <div className="text-[11px] text-gray-500 uppercase tracking-wider">{card.label}</div>
-            <div className="text-xl font-bold text-white mt-2">{card.value}</div>
+          <div key={card.label} className="bg-card border border-border-default rounded-xl p-4">
+            <div className="text-[11px] text-muted uppercase tracking-wider">{card.label}</div>
+            <div className="text-xl font-bold text-heading mt-2">{card.value}</div>
           </div>
         ))}
       </div>
@@ -150,36 +150,36 @@ export default function AnalyticsPage() {
       {/* Charts grid */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Queries over time */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <h2 className="text-sm font-semibold text-white mb-4">Queries Over Time</h2>
+        <div className="bg-card border border-border-default rounded-xl p-5">
+          <h2 className="text-sm font-semibold text-heading mb-4">Queries Over Time</h2>
           {chartData.length > 0 ? (
             <div>
               <BarChart data={chartData} />
-              <div className="flex justify-between mt-2 text-[10px] text-gray-600">
+              <div className="flex justify-between mt-2 text-[10px] text-faint">
                 <span>{chartData[0]?.label}</span>
                 <span>{chartData[chartData.length - 1]?.label}</span>
               </div>
             </div>
           ) : (
-            <p className="text-sm text-gray-600 py-8 text-center">No query data for this period.</p>
+            <p className="text-sm text-faint py-8 text-center">No query data for this period.</p>
           )}
         </div>
 
         {/* Top tenants */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <h2 className="text-sm font-semibold text-white mb-4">Top Tenants</h2>
+        <div className="bg-card border border-border-default rounded-xl p-5">
+          <h2 className="text-sm font-semibold text-heading mb-4">Top Tenants</h2>
           {data.top_tenants.length > 0 ? (
             <HorizontalBar
               items={data.top_tenants.map((t) => ({ label: t.tenant_name, value: t.count }))}
             />
           ) : (
-            <p className="text-sm text-gray-600 py-8 text-center">No tenant data yet.</p>
+            <p className="text-sm text-faint py-8 text-center">No tenant data yet.</p>
           )}
         </div>
 
         {/* By user type */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <h2 className="text-sm font-semibold text-white mb-4">Queries by User Type</h2>
+        <div className="bg-card border border-border-default rounded-xl p-5">
+          <h2 className="text-sm font-semibold text-heading mb-4">Queries by User Type</h2>
           {data.queries_by_user_type.length > 0 ? (
             <div className="space-y-3">
               {data.queries_by_user_type.map((item) => {
@@ -190,25 +190,25 @@ export default function AnalyticsPage() {
                     <div className="flex items-center gap-3">
                       <div className={`w-3 h-3 rounded-full ${
                         item.user_type === "policyholder" ? "bg-emerald-400" :
-                        item.user_type === "staff" ? "bg-blue-400" : "bg-amber-400"
+                        item.user_type === "staff" ? "bg-blue-400" : "bg-accent"
                       }`} />
-                      <span className="text-sm text-gray-300 capitalize">{item.user_type}</span>
+                      <span className="text-sm text-body capitalize">{item.user_type}</span>
                     </div>
-                    <span className="text-sm text-gray-400">
-                      {item.count.toLocaleString()} <span className="text-gray-600">({pct}%)</span>
+                    <span className="text-sm text-secondary">
+                      {item.count.toLocaleString()} <span className="text-faint">({pct}%)</span>
                     </span>
                   </div>
                 );
               })}
             </div>
           ) : (
-            <p className="text-sm text-gray-600 py-8 text-center">No data yet.</p>
+            <p className="text-sm text-faint py-8 text-center">No data yet.</p>
           )}
         </div>
 
         {/* By document type */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <h2 className="text-sm font-semibold text-white mb-4">Queries by Document Type</h2>
+        <div className="bg-card border border-border-default rounded-xl p-5">
+          <h2 className="text-sm font-semibold text-heading mb-4">Queries by Document Type</h2>
           {data.queries_by_document_type.length > 0 ? (
             <div className="space-y-3">
               {data.queries_by_document_type.map((item) => {
@@ -220,17 +220,17 @@ export default function AnalyticsPage() {
                       <div className={`w-3 h-3 rounded-full ${
                         item.document_type === "policy" ? "bg-violet-400" : "bg-cyan-400"
                       }`} />
-                      <span className="text-sm text-gray-300 capitalize">{item.document_type}</span>
+                      <span className="text-sm text-body capitalize">{item.document_type}</span>
                     </div>
-                    <span className="text-sm text-gray-400">
-                      {item.count.toLocaleString()} <span className="text-gray-600">({pct}%)</span>
+                    <span className="text-sm text-secondary">
+                      {item.count.toLocaleString()} <span className="text-faint">({pct}%)</span>
                     </span>
                   </div>
                 );
               })}
             </div>
           ) : (
-            <p className="text-sm text-gray-600 py-8 text-center">No data yet.</p>
+            <p className="text-sm text-faint py-8 text-center">No data yet.</p>
           )}
         </div>
       </div>

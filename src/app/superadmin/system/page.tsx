@@ -58,7 +58,7 @@ export default function SystemHealthPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-400" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent" />
       </div>
     );
   }
@@ -78,16 +78,16 @@ export default function SystemHealthPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-white">System Health</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl font-semibold text-heading">System Health</h1>
+          <p className="text-sm text-muted mt-1">
             {data?.checked_at ? `Last checked: ${new Date(data.checked_at).toLocaleTimeString()}` : ""}
-            {refreshing && <span className="ml-2 text-amber-400">Refreshing...</span>}
+            {refreshing && <span className="ml-2 text-accent">Refreshing...</span>}
           </p>
         </div>
         <button
           onClick={() => loadHealth(true)}
           disabled={refreshing}
-          className="px-4 py-2.5 border border-gray-700 text-gray-300 text-sm rounded-lg hover:bg-gray-800 disabled:opacity-50 self-start"
+          className="px-4 py-2.5 border border-input-border text-body text-sm rounded-lg hover:bg-surface disabled:opacity-50 self-start"
         >
           Refresh
         </button>
@@ -101,7 +101,7 @@ export default function SystemHealthPage() {
             <span className={`text-lg font-semibold ${overallStyle.text} capitalize`}>{data.overall}</span>
           </div>
           {data.uptime_seconds && (
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="text-sm text-muted mt-2">
               Uptime: {formatUptime(data.uptime_seconds)}
             </p>
           )}
@@ -115,16 +115,16 @@ export default function SystemHealthPage() {
           return (
             <div
               key={service.name}
-              className="bg-gray-900 border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors"
+              className="bg-card border border-border-default rounded-xl p-5 hover:border-input-border transition-colors"
             >
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className={`w-2.5 h-2.5 rounded-full ${style.dot}`} />
-                  <h3 className="text-sm font-semibold text-white">{service.name}</h3>
+                  <h3 className="text-sm font-semibold text-heading">{service.name}</h3>
                 </div>
                 <div className="flex items-center gap-3">
                   {service.latency_ms !== null && (
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-muted">
                       {service.latency_ms.toFixed(1)}ms
                     </span>
                   )}
@@ -134,14 +134,14 @@ export default function SystemHealthPage() {
                 </div>
               </div>
               {service.details && (
-                <p className="text-xs text-gray-500 leading-relaxed">{service.details}</p>
+                <p className="text-xs text-muted leading-relaxed">{service.details}</p>
               )}
             </div>
           );
         })}
       </div>
 
-      <p className="text-[11px] text-gray-600 mt-6">
+      <p className="text-[11px] text-faint mt-6">
         Auto-refreshes every 30 seconds.
       </p>
     </div>

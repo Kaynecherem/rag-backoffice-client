@@ -16,11 +16,11 @@ export default function SupportToolsPage() {
 
   return (
     <div className="p-6 lg:p-8 max-w-5xl">
-      <h1 className="text-2xl font-semibold text-white mb-6">Support Tools</h1>
-      <div className="flex gap-1 mb-6 bg-gray-900 rounded-lg p-1 w-fit">
+      <h1 className="text-2xl font-semibold text-heading mb-6">Support Tools</h1>
+      <div className="flex gap-1 mb-6 bg-card rounded-lg p-1 w-fit">
         {tabs.map((t) => (
           <button key={t.key} onClick={() => setActiveTab(t.key)}
-            className={`px-4 py-2 text-xs font-medium rounded-md transition-all ${activeTab === t.key ? "bg-gray-800 text-white" : "text-gray-500 hover:text-gray-300"}`}>
+            className={`px-4 py-2 text-xs font-medium rounded-md transition-all ${activeTab === t.key ? "bg-surface text-heading" : "text-muted hover:text-body"}`}>
             {t.label}
           </button>
         ))}
@@ -56,27 +56,27 @@ function QueryLookupSection() {
         <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && doSearch()}
           placeholder="Search questions, answers, policy numbers..."
-          className="flex-1 px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:border-gray-600" />
+          className="flex-1 px-3 py-2.5 bg-surface border border-input-border rounded-lg text-sm text-heading placeholder-muted focus:outline-none focus:border-input-border" />
         <button onClick={() => doSearch()} disabled={loading}
-          className="px-4 py-2.5 bg-amber-400 text-gray-950 text-sm font-semibold rounded-lg hover:bg-amber-300 disabled:opacity-50">
+          className="px-4 py-2.5 bg-accent text-on-accent text-sm font-semibold rounded-lg hover:bg-accent-hover disabled:opacity-50">
           {loading ? "..." : "Search"}
         </button>
       </div>
       {results.length > 0 && (
         <div className="space-y-3">
-          <p className="text-xs text-gray-500">{total} result{total !== 1 ? "s" : ""}</p>
+          <p className="text-xs text-muted">{total} result{total !== 1 ? "s" : ""}</p>
           {results.map((q: any) => (
-            <div key={q.id} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-              <div className="flex items-center gap-2 text-[10px] text-gray-600 mb-2">
-                <span className="font-medium text-gray-400">{q.tenant_name}</span>
+            <div key={q.id} className="bg-card border border-border-default rounded-xl p-4">
+              <div className="flex items-center gap-2 text-[10px] text-faint mb-2">
+                <span className="font-medium text-secondary">{q.tenant_name}</span>
                 <span>·</span><span>{q.user_type}</span>
                 <span>·</span><span>{q.user_identifier}</span>
                 {q.policy_number && <><span>·</span><span className="font-mono">{q.policy_number}</span></>}
                 <span>·</span><span>{new Date(q.queried_at).toLocaleString()}</span>
               </div>
-              <p className="text-sm text-white mb-1"><strong>Q:</strong> {q.question}</p>
-              {q.answer && <p className="text-xs text-gray-400 line-clamp-3"><strong>A:</strong> {q.answer}</p>}
-              <div className="flex gap-3 mt-2 text-[10px] text-gray-600">
+              <p className="text-sm text-heading mb-1"><strong>Q:</strong> {q.question}</p>
+              {q.answer && <p className="text-xs text-secondary line-clamp-3"><strong>A:</strong> {q.answer}</p>}
+              <div className="flex gap-3 mt-2 text-[10px] text-faint">
                 {q.confidence && <span>Confidence: {(q.confidence * 100).toFixed(0)}%</span>}
                 {q.latency_ms && <span>Latency: {q.latency_ms}ms</span>}
               </div>
@@ -84,9 +84,9 @@ function QueryLookupSection() {
           ))}
           {total > 10 && (
             <div className="flex gap-2 justify-center">
-              <button onClick={() => doSearch(page - 1)} disabled={page <= 1} className="px-3 py-1.5 text-xs border border-gray-700 text-gray-400 rounded-lg disabled:opacity-30">Prev</button>
-              <span className="text-xs text-gray-500 py-1.5">Page {page}</span>
-              <button onClick={() => doSearch(page + 1)} disabled={page * 10 >= total} className="px-3 py-1.5 text-xs border border-gray-700 text-gray-400 rounded-lg disabled:opacity-30">Next</button>
+              <button onClick={() => doSearch(page - 1)} disabled={page <= 1} className="px-3 py-1.5 text-xs border border-input-border text-secondary rounded-lg disabled:opacity-30">Prev</button>
+              <span className="text-xs text-muted py-1.5">Page {page}</span>
+              <button onClick={() => doSearch(page + 1)} disabled={page * 10 >= total} className="px-3 py-1.5 text-xs border border-input-border text-secondary rounded-lg disabled:opacity-30">Next</button>
             </div>
           )}
         </div>
@@ -123,34 +123,34 @@ function VerificationSection() {
 
   return (
     <div className="space-y-4 max-w-lg">
-      <p className="text-xs text-gray-500">Check whether a policyholder can authenticate and query their policy.</p>
+      <p className="text-xs text-muted">Check whether a policyholder can authenticate and query their policy.</p>
       <div>
-        <label className="block text-xs font-medium text-gray-400 mb-1.5">Tenant</label>
+        <label className="block text-xs font-medium text-secondary mb-1.5">Tenant</label>
         <select value={tenantId} onChange={(e) => setTenantId(e.target.value)}
-          className="w-full px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-gray-600">
+          className="w-full px-3 py-2.5 bg-surface border border-input-border rounded-lg text-sm text-heading focus:outline-none focus:border-input-border">
           <option value="">Select tenant...</option>
           {tenants.map((t: any) => <option key={t.id} value={t.id}>{t.name}</option>)}
         </select>
       </div>
       <div>
-        <label className="block text-xs font-medium text-gray-400 mb-1.5">Policy Number</label>
+        <label className="block text-xs font-medium text-secondary mb-1.5">Policy Number</label>
         <input type="text" value={policyNumber} onChange={(e) => setPolicyNumber(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && doVerify()}
-          className="w-full px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white font-mono focus:outline-none focus:border-gray-600"
+          className="w-full px-3 py-2.5 bg-surface border border-input-border rounded-lg text-sm text-heading font-mono focus:outline-none focus:border-input-border"
           placeholder="POL-2024-001" />
       </div>
       <button onClick={doVerify} disabled={loading || !tenantId || !policyNumber.trim()}
-        className="px-4 py-2.5 bg-amber-400 text-gray-950 text-sm font-semibold rounded-lg hover:bg-amber-300 disabled:opacity-50">
+        className="px-4 py-2.5 bg-accent text-on-accent text-sm font-semibold rounded-lg hover:bg-accent-hover disabled:opacity-50">
         {loading ? "Checking..." : "Run Check"}
       </button>
 
       {result && !result.error && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-2">
-          <h4 className="text-sm font-medium text-white">{result.tenant_name} — {result.policy_number}</h4>
+        <div className="bg-card border border-border-default rounded-xl p-4 space-y-2">
+          <h4 className="text-sm font-medium text-heading">{result.tenant_name} — {result.policy_number}</h4>
           <div className="space-y-1 text-sm">
             <div className={checkStyle(result.found)}>{result.found ? "✓" : "✗"} Policyholder record {result.found ? "found" : "NOT found"}</div>
             {result.policyholder && (
-              <div className="text-xs text-gray-500 ml-4">
+              <div className="text-xs text-muted ml-4">
                 {result.policyholder.last_name && `Last name: ${result.policyholder.last_name}`}
                 {result.policyholder.company_name && ` | Company: ${result.policyholder.company_name}`}
                 {` | Active: ${result.policyholder.is_active}`}
@@ -196,25 +196,25 @@ function MaintenanceSection() {
 
   return (
     <div className="space-y-4 max-w-lg">
-      <h3 className="text-sm font-semibold text-white">Failed Documents</h3>
+      <h3 className="text-sm font-semibold text-heading">Failed Documents</h3>
       {loading ? (
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-amber-400" />
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent" />
       ) : summary ? (
         <div className="space-y-3">
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            <div className="text-[11px] text-gray-500 uppercase tracking-wider">Total Failed</div>
-            <div className={`text-2xl font-bold mt-1 ${summary.total_failed > 0 ? "text-red-400" : "text-white"}`}>{summary.total_failed}</div>
+          <div className="bg-card border border-border-default rounded-xl p-4">
+            <div className="text-[11px] text-muted uppercase tracking-wider">Total Failed</div>
+            <div className={`text-2xl font-bold mt-1 ${summary.total_failed > 0 ? "text-red-400" : "text-heading"}`}>{summary.total_failed}</div>
           </div>
           {summary.by_tenant?.length > 0 && (
             <div className="space-y-2">
               {summary.by_tenant.map((t: any) => (
-                <div key={t.tenant_id} className="flex items-center justify-between bg-gray-900 border border-gray-800 rounded-lg px-4 py-3">
+                <div key={t.tenant_id} className="flex items-center justify-between bg-card border border-border-default rounded-lg px-4 py-3">
                   <div>
-                    <span className="text-sm text-white">{t.tenant_name}</span>
+                    <span className="text-sm text-heading">{t.tenant_name}</span>
                     <span className="text-xs text-red-400 ml-2">{t.count} failed</span>
                   </div>
                   <button onClick={() => handleClear(t.tenant_id)} disabled={clearing}
-                    className="px-2 py-1 text-[11px] text-amber-400 border border-amber-400/30 rounded hover:bg-amber-400/10 disabled:opacity-50">
+                    className="px-2 py-1 text-[11px] text-accent border border-accent/30 rounded hover:bg-accent/10 disabled:opacity-50">
                     Reset
                   </button>
                 </div>
@@ -223,7 +223,7 @@ function MaintenanceSection() {
           )}
           {summary.total_failed > 0 && (
             <button onClick={() => handleClear()} disabled={clearing}
-              className="px-4 py-2.5 bg-amber-400 text-gray-950 text-sm font-semibold rounded-lg hover:bg-amber-300 disabled:opacity-50">
+              className="px-4 py-2.5 bg-accent text-on-accent text-sm font-semibold rounded-lg hover:bg-accent-hover disabled:opacity-50">
               {clearing ? "Resetting..." : "Reset All Failed Documents"}
             </button>
           )}
