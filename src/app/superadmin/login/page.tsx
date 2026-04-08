@@ -4,11 +4,12 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSuperAdminAuth } from "@/lib/superadmin-auth-context";
 import { superadminLogin, superadminSetup } from "@/lib/superadmin-api";
-import Image from "next/image";
+import { useTheme } from "@/components/ThemeProvider";
 
 export default function SuperAdminLoginPage() {
   const { login } = useSuperAdminAuth();
   const router = useRouter();
+  const { theme } = useTheme();
 
   const [mode, setMode] = useState<"login" | "setup">("login");
   const [email, setEmail] = useState("");
@@ -41,50 +42,47 @@ export default function SuperAdminLoginPage() {
   };
 
   return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-page flex items-center justify-center px-4">
         <div className="w-full max-w-sm">
-          {/* Header — Patch Branding */}
+          {/* Header — Patch Premium Finance */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 mx-auto mb-3 rounded-2xl overflow-hidden">
-              <Image
-                  src="/patch-logo-orange.jpg"
-                  alt="Patch"
-                  width={64}
-                  height={64}
-                  className="w-full h-full object-cover"
+            <div className="mx-auto mb-3" style={{ height: '64px' }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                  src={theme === "dark" ? "/patch-premium-finance-logo-dark.svg" : "/patch-premium-finance-logo.svg"}
+                  alt="Patch Premium Finance"
+                  style={{ height: '64px', width: 'auto' }}
+                  className="mx-auto"
               />
             </div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-amber-400/70 mt-2">
-              Powered by Patch
-            </p>
-            <p className="text-xs text-gray-500 mt-1">
-              Platform Administration
+            <p className="text-xs text-muted mt-1">
+              Platform administration
             </p>
           </div>
 
           {/* Mode toggle */}
-          <div className="flex mb-6 bg-gray-900 rounded-lg p-1">
+          <div className="flex mb-6 bg-surface rounded-lg p-1">
             <button
                 type="button"
                 onClick={() => setMode("login")}
                 className={`flex-1 py-2 text-xs font-medium rounded-md transition-all ${
                     mode === "login"
-                        ? "bg-gray-800 text-white shadow-sm"
-                        : "text-gray-500 hover:text-gray-300"
+                        ? "bg-card text-heading shadow-sm"
+                        : "text-muted hover:text-body"
                 }`}
             >
-              Sign In
+              Sign in
             </button>
             <button
                 type="button"
                 onClick={() => setMode("setup")}
                 className={`flex-1 py-2 text-xs font-medium rounded-md transition-all ${
                     mode === "setup"
-                        ? "bg-gray-800 text-white shadow-sm"
-                        : "text-gray-500 hover:text-gray-300"
+                        ? "bg-card text-heading shadow-sm"
+                        : "text-muted hover:text-body"
                 }`}
             >
-              Initial Setup
+              Initial setup
             </button>
           </div>
 
@@ -92,7 +90,7 @@ export default function SuperAdminLoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "setup" && (
                 <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-1.5">
+                  <label className="block text-xs font-medium text-secondary mb-1.5">
                     Name
                   </label>
                   <input
@@ -100,14 +98,14 @@ export default function SuperAdminLoginPage() {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       required
-                      className="w-full px-3 py-2.5 bg-gray-900 border border-gray-800 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:border-amber-400/50 focus:ring-1 focus:ring-amber-400/20 transition-colors"
+                      className="w-full px-3 py-2.5 bg-card border border-border-default rounded-lg text-sm text-heading placeholder-muted focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-colors"
                       placeholder="Your name"
                   />
                 </div>
             )}
 
             <div>
-              <label className="block text-xs font-medium text-gray-400 mb-1.5">
+              <label className="block text-xs font-medium text-secondary mb-1.5">
                 Email
               </label>
               <input
@@ -115,13 +113,13 @@ export default function SuperAdminLoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full px-3 py-2.5 bg-gray-900 border border-gray-800 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:border-amber-400/50 focus:ring-1 focus:ring-amber-400/20 transition-colors"
+                  className="w-full px-3 py-2.5 bg-card border border-border-default rounded-lg text-sm text-heading placeholder-muted focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-colors"
                   placeholder="admin@company.com"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-400 mb-1.5">
+              <label className="block text-xs font-medium text-secondary mb-1.5">
                 Password
               </label>
               <div className="relative">
@@ -131,13 +129,13 @@ export default function SuperAdminLoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     minLength={8}
-                    className="w-full px-3 py-2.5 pr-10 bg-gray-900 border border-gray-800 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:border-amber-400/50 focus:ring-1 focus:ring-amber-400/20 transition-colors"
+                    className="w-full px-3 py-2.5 pr-10 bg-card border border-border-default rounded-lg text-sm text-heading placeholder-muted focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-colors"
                     placeholder="••••••••"
                 />
                 <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-body transition-colors"
                     tabIndex={-1}
                 >
                   {showPassword ? (
@@ -156,7 +154,7 @@ export default function SuperAdminLoginPage() {
             </div>
 
             {error && (
-                <div className="text-red-400 text-xs bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
+                <div className="text-red-500 text-xs bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
                   {error}
                 </div>
             )}
@@ -164,18 +162,18 @@ export default function SuperAdminLoginPage() {
             <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 bg-amber-400 text-gray-950 text-sm font-semibold rounded-lg hover:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-400/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-2.5 bg-accent text-on-accent text-sm font-semibold rounded-lg hover:bg-accent-hover focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading
                   ? "..."
                   : mode === "setup"
-                      ? "Create Superadmin Account"
-                      : "Sign In"}
+                      ? "Create superadmin account"
+                      : "Sign in"}
             </button>
           </form>
 
           {mode === "setup" && (
-              <p className="mt-4 text-[11px] text-gray-600 text-center leading-relaxed">
+              <p className="mt-4 text-[11px] text-faint text-center leading-relaxed">
                 Initial setup creates the first superadmin account.
                 This only works once — when no superadmins exist yet.
               </p>

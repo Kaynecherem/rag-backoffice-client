@@ -128,7 +128,7 @@ export default function PlansPage() {
     if (loading) {
         return (
             <div className="flex justify-center py-20">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-amber-400" />
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent" />
             </div>
         );
     }
@@ -141,8 +141,8 @@ export default function PlansPage() {
     return (
         <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
             <div>
-                <h1 className="text-xl font-bold text-white">Plans & Pricing</h1>
-                <p className="text-sm text-gray-500 mt-1">
+                <h1 className="text-xl font-bold text-heading">Plans & Pricing</h1>
+                <p className="text-sm text-muted mt-1">
                     Configure plan limits and features. Policy documents are unlimited on all plans. Click &ldquo;Edit&rdquo; to modify a plan.
                 </p>
             </div>
@@ -183,7 +183,7 @@ export default function PlansPage() {
                                 {!isEditing ? (
                                     <button
                                         onClick={() => startEdit(plan.key, plan)}
-                                        className="text-[10px] text-gray-500 hover:text-amber-400 transition"
+                                        className="text-[10px] text-muted hover:text-accent transition"
                                     >
                                         Edit
                                     </button>
@@ -192,13 +192,13 @@ export default function PlansPage() {
                                         <button
                                             onClick={handleSave}
                                             disabled={saving}
-                                            className="text-[10px] text-amber-400 hover:text-amber-300 font-medium"
+                                            className="text-[10px] text-accent hover:text-accent-hover font-medium"
                                         >
                                             {saving ? "..." : "Save"}
                                         </button>
                                         <button
                                             onClick={cancelEdit}
-                                            className="text-[10px] text-gray-500 hover:text-gray-300"
+                                            className="text-[10px] text-muted hover:text-body"
                                         >
                                             Cancel
                                         </button>
@@ -223,7 +223,7 @@ export default function PlansPage() {
                                     onChange={(v) => setEditForm((p: any) => ({ ...p, document_limit: v }))}
                                 />
                                 <div className="flex items-center justify-between">
-                                    <span className="text-xs text-gray-500">Policy Documents</span>
+                                    <span className="text-xs text-muted">Policy Documents</span>
                                     <span className="text-sm font-semibold text-emerald-400">Unlimited</span>
                                 </div>
                                 <EditableLimitRow
@@ -234,14 +234,14 @@ export default function PlansPage() {
                                     onChange={(v) => setEditForm((p: any) => ({ ...p, staff_limit: v }))}
                                 />
                                 <div className="flex items-center justify-between">
-                                    <span className="text-xs text-gray-500">Policyholders</span>
+                                    <span className="text-xs text-muted">Policyholders</span>
                                     <span className="text-sm font-semibold text-emerald-400">Unlimited</span>
                                 </div>
                             </div>
 
                             {/* Features */}
-                            <div className="mt-5 pt-4 border-t border-gray-800">
-                                <div className="text-[10px] text-gray-600 uppercase tracking-wider mb-2">
+                            <div className="mt-5 pt-4 border-t border-border-default">
+                                <div className="text-[10px] text-faint uppercase tracking-wider mb-2">
                                     Features
                                 </div>
                                 <div className="space-y-1.5">
@@ -254,16 +254,16 @@ export default function PlansPage() {
                                                     <button
                                                         type="button"
                                                         onClick={() => toggleFeature(feat)}
-                                                        className={`text-sm ${included ? accent.text : "text-gray-700"}`}
+                                                        className={`text-sm ${included ? accent.text : "text-faint"}`}
                                                     >
                                                         {included ? "✓" : "○"}
                                                     </button>
                                                 ) : included ? (
                                                     <span className={`text-sm ${accent.text}`}>✓</span>
                                                 ) : (
-                                                    <span className="text-gray-700 text-sm">—</span>
+                                                    <span className="text-faint text-sm">—</span>
                                                 )}
-                                                <span className={`text-xs ${included ? "text-gray-300" : "text-gray-600"}`}>
+                                                <span className={`text-xs ${included ? "text-body" : "text-faint"}`}>
                                                     {FEATURE_LABELS[feat]?.name || feat}
                                                 </span>
                                             </div>
@@ -278,15 +278,15 @@ export default function PlansPage() {
 
             {/* Feature Descriptions */}
             <div>
-                <h2 className="text-sm font-semibold text-white mb-3">Feature Details</h2>
+                <h2 className="text-sm font-semibold text-heading mb-3">Feature Details</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {ALL_FEATURES.map((feat) => {
                         const info = FEATURE_LABELS[feat];
                         if (!info) return null;
                         return (
-                            <div key={feat} className="bg-gray-900 border border-gray-800 rounded-lg px-4 py-3">
-                                <div className="text-xs font-medium text-white">{info.name}</div>
-                                <div className="text-xs text-gray-500 mt-1">{info.description}</div>
+                            <div key={feat} className="bg-card border border-border-default rounded-lg px-4 py-3">
+                                <div className="text-xs font-medium text-heading">{info.name}</div>
+                                <div className="text-xs text-muted mt-1">{info.description}</div>
                             </div>
                         );
                     })}
@@ -312,21 +312,21 @@ function EditableLimitRow({
     if (editing) {
         return (
             <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">{label}</span>
+                <span className="text-xs text-muted">{label}</span>
                 <input
                     type="number"
                     min={0}
                     value={value}
                     onChange={(e) => onChange(parseInt(e.target.value) || 0)}
-                    className="w-24 text-right px-2 py-1 bg-gray-800 border border-gray-700 rounded text-xs text-white focus:outline-none focus:border-amber-400/50"
+                    className="w-24 text-right px-2 py-1 bg-surface border border-input-border rounded text-xs text-heading focus:outline-none focus:border-accent/50"
                 />
             </div>
         );
     }
     return (
         <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-500">{label}</span>
-            <span className={`text-sm font-semibold ${value === 0 ? accent : "text-white"}`}>
+            <span className="text-xs text-muted">{label}</span>
+            <span className={`text-sm font-semibold ${value === 0 ? accent : "text-heading"}`}>
                 {formatLimit(value)}
             </span>
         </div>

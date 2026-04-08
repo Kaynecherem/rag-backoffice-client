@@ -117,25 +117,25 @@ function ImpersonationTab({ tenantId }: { tenantId: string }) {
     if (loadingLists)
         return (
             <div className="flex justify-center py-12">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-amber-400" />
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent" />
             </div>
         );
 
     return (
         <div className="space-y-6 max-w-xl">
-            <div className="bg-amber-400/5 border border-amber-400/20 rounded-lg p-4">
-                <p className="text-xs text-amber-400/80 leading-relaxed">
+            <div className="bg-accent/5 border border-accent/20 rounded-lg p-4">
+                <p className="text-xs text-accent/80 leading-relaxed">
                     Impersonation generates a short-lived token (2 hours) that lets you
                     view the main app as a specific staff member or policyholder. All
                     actions taken during impersonation are logged in the audit trail.
                 </p>
             </div>
 
-            <div className="flex gap-1 bg-gray-900 rounded-lg p-1 w-fit">
+            <div className="flex gap-1 bg-card rounded-lg p-1 w-fit">
                 <button
                     onClick={() => { setMode("staff"); setResult(null); setError(""); }}
                     className={`px-4 py-2 text-xs font-medium rounded-md transition-all ${
-                        mode === "staff" ? "bg-gray-800 text-white" : "text-gray-500 hover:text-gray-300"
+                        mode === "staff" ? "bg-surface text-heading" : "text-muted hover:text-body"
                     }`}
                 >
                     Staff
@@ -143,7 +143,7 @@ function ImpersonationTab({ tenantId }: { tenantId: string }) {
                 <button
                     onClick={() => { setMode("policyholder"); setResult(null); setError(""); }}
                     className={`px-4 py-2 text-xs font-medium rounded-md transition-all ${
-                        mode === "policyholder" ? "bg-gray-800 text-white" : "text-gray-500 hover:text-gray-300"
+                        mode === "policyholder" ? "bg-surface text-heading" : "text-muted hover:text-body"
                     }`}
                 >
                     Policyholder
@@ -153,11 +153,11 @@ function ImpersonationTab({ tenantId }: { tenantId: string }) {
             {mode === "staff" && (
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-xs font-medium text-gray-400 mb-1.5">Staff User</label>
+                        <label className="block text-xs font-medium text-secondary mb-1.5">Staff User</label>
                         <select
                             value={selectedStaff}
                             onChange={(e) => setSelectedStaff(e.target.value)}
-                            className="w-full px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-amber-400/50"
+                            className="w-full px-3 py-2.5 bg-surface border border-input-border rounded-lg text-sm text-heading focus:outline-none focus:border-accent/50"
                         >
                             <option value="">Auto-select (first admin)</option>
                             {staffList.map((s: any) => (
@@ -168,11 +168,11 @@ function ImpersonationTab({ tenantId }: { tenantId: string }) {
                         </select>
                     </div>
                     <div>
-                        <label className="block text-xs font-medium text-gray-400 mb-1.5">View As Role</label>
+                        <label className="block text-xs font-medium text-secondary mb-1.5">View As Role</label>
                         <select
                             value={staffRole}
                             onChange={(e) => setStaffRole(e.target.value)}
-                            className="w-full px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-amber-400/50"
+                            className="w-full px-3 py-2.5 bg-surface border border-input-border rounded-lg text-sm text-heading focus:outline-none focus:border-accent/50"
                         >
                             <option value="admin">Admin</option>
                             <option value="staff">Staff</option>
@@ -184,12 +184,12 @@ function ImpersonationTab({ tenantId }: { tenantId: string }) {
             {mode === "policyholder" && (
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-xs font-medium text-gray-400 mb-1.5">Policy Number</label>
+                        <label className="block text-xs font-medium text-secondary mb-1.5">Policy Number</label>
                         {phList.length > 0 ? (
                             <select
                                 value={policyNumber}
                                 onChange={(e) => setPolicyNumber(e.target.value)}
-                                className="w-full px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-amber-400/50"
+                                className="w-full px-3 py-2.5 bg-surface border border-input-border rounded-lg text-sm text-heading focus:outline-none focus:border-accent/50"
                             >
                                 <option value="">Select a policyholder</option>
                                 {phList.map((ph: any) => (
@@ -204,7 +204,7 @@ function ImpersonationTab({ tenantId }: { tenantId: string }) {
                                 value={policyNumber}
                                 onChange={(e) => setPolicyNumber(e.target.value)}
                                 placeholder="Enter policy number"
-                                className="w-full px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-amber-400/50"
+                                className="w-full px-3 py-2.5 bg-surface border border-input-border rounded-lg text-sm text-heading focus:outline-none focus:border-accent/50"
                             />
                         )}
                     </div>
@@ -220,39 +220,39 @@ function ImpersonationTab({ tenantId }: { tenantId: string }) {
             <button
                 onClick={handleImpersonate}
                 disabled={loading}
-                className="px-5 py-2.5 bg-amber-400 text-gray-950 text-sm font-semibold rounded-lg hover:bg-amber-300 disabled:opacity-50"
+                className="px-5 py-2.5 bg-accent text-on-accent text-sm font-semibold rounded-lg hover:bg-accent-hover disabled:opacity-50"
             >
                 {loading ? "Generating..." : "Generate Token"}
             </button>
 
             {result && (
-                <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 space-y-4">
+                <div className="bg-card border border-border-default rounded-xl p-5 space-y-4">
                     <div className="flex items-center gap-2">
                         <span className="text-emerald-400 text-sm">✓</span>
-                        <span className="text-sm text-white font-medium">Token Generated</span>
+                        <span className="text-sm text-heading font-medium">Token Generated</span>
                     </div>
 
-                    <div className="space-y-2 text-xs text-gray-400">
+                    <div className="space-y-2 text-xs text-secondary">
                         <div className="flex justify-between">
                             <span>Impersonating</span>
-                            <span className="text-white">{result.user_identifier}</span>
+                            <span className="text-heading">{result.user_identifier}</span>
                         </div>
                         <div className="flex justify-between">
                             <span>Type</span>
-                            <span className="text-white capitalize">{result.impersonating}</span>
+                            <span className="text-heading capitalize">{result.impersonating}</span>
                         </div>
                         <div className="flex justify-between">
                             <span>Role</span>
-                            <span className="text-white capitalize">{result.role}</span>
+                            <span className="text-heading capitalize">{result.role}</span>
                         </div>
                         <div className="flex justify-between">
                             <span>Expires</span>
-                            <span className="text-white">{result.expires_in_hours} hours</span>
+                            <span className="text-heading">{result.expires_in_hours} hours</span>
                         </div>
                         {result.tenant_slug && (
                             <div className="flex justify-between">
                                 <span>App URL</span>
-                                <span className="text-white">{result.tenant_slug}.agencylensai.com</span>
+                                <span className="text-heading">{result.tenant_slug}.agencylensai.com</span>
                             </div>
                         )}
                     </div>
@@ -260,21 +260,23 @@ function ImpersonationTab({ tenantId }: { tenantId: string }) {
                     <div className="flex gap-2 pt-2">
                         <button
                             onClick={openAsUser}
-                            className="flex-1 px-4 py-2 bg-amber-400 text-gray-950 text-xs font-semibold rounded-lg hover:bg-amber-300"
+                            className="flex-1 px-4 py-2 bg-accent text-on-accent text-xs font-semibold rounded-lg hover:bg-accent-hover"
                         >
                             Open as {result.impersonating === "staff" ? "Staff" : "Policyholder"}
                         </button>
                         <button
                             onClick={copyToken}
-                            className="px-4 py-2 border border-gray-700 text-gray-400 text-xs rounded-lg hover:bg-gray-800"
+                            className="px-4 py-2 border border-input-border text-secondary text-xs rounded-lg hover:bg-surface"
                         >
                             {copied ? "Copied!" : "Copy Token"}
                         </button>
                     </div>
 
-                    <p className="text-[11px] text-gray-600 leading-relaxed">{result.notice}</p>
+                    <p className="text-[11px] text-faint leading-relaxed">{result.notice}</p>
                 </div>
             )}
         </div>
     );
 }
+
+export default ImpersonationTab;
